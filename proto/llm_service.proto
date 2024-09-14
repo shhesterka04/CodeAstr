@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package llm;
+
+service LLMService {
+    rpc GetLLM(GetLLMRequest) returns (GetLLMResponse);
+}
+
+service HealthCheckService {
+    rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message GetLLMRequest {
+    string user_id = 1;
+    string prompt = 2;
+}
+
+message GetLLMResponse {
+    string answer = 1;
+    string raw_json = 2;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+    string status = 1;
+}
