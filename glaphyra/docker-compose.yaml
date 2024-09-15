@@ -1,0 +1,19 @@
+networks:
+  net:
+    driver: bridge
+
+services:
+  database:
+    image: postgres:13
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: test
+      POSTGRES_USER: test
+      POSTGRES_DB: test
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: pg_isready -U test -d test
+      interval: 10s
+      timeout: 3s
+      retries: 5
