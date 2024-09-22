@@ -24,23 +24,23 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11llm_service.proto\x12\x03llm\"0\n\rGetLLMRequest\x12\x0f\n\x07user_id\x18\x01 \x01(\t\x12\x0e\n\x06prompt\x18\x02 \x01(\t\"2\n\x0eGetLLMResponse\x12\x0e\n\x06\x61nswer\x18\x01 \x01(\t\x12\x10\n\x08raw_json\x18\x02 \x01(\t\"\x14\n\x12HealthCheckRequest\"%\n\x13HealthCheckResponse\x12\x0e\n\x06status\x18\x01 \x01(\t2?\n\nLLMService\x12\x31\n\x06GetLLM\x12\x12.llm.GetLLMRequest\x1a\x13.llm.GetLLMResponse2P\n\x12HealthCheckService\x12:\n\x05\x43heck\x12\x17.llm.HealthCheckRequest\x1a\x18.llm.HealthCheckResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11llm_service.proto\x12\x03llm\"y\n\x11\x43ompletionRequest\x12\r\n\x05model\x18\x01 \x01(\t\x12\x13\n\x0btemperature\x18\x02 \x01(\x02\x12\x12\n\nmax_tokens\x18\x03 \x01(\x05\x12\x16\n\x0esystem_message\x18\x04 \x01(\t\x12\x14\n\x0cuser_message\x18\x05 \x01(\t\"\x87\x01\n\x12\x43ompletionResponse\x12\x0e\n\x06result\x18\x01 \x01(\t\x12\x19\n\x11input_text_tokens\x18\x02 \x01(\x05\x12\x19\n\x11\x63ompletion_tokens\x18\x03 \x01(\x05\x12\x14\n\x0ctotal_tokens\x18\x04 \x01(\x05\x12\x15\n\rmodel_version\x18\x05 \x01(\t\"\x14\n\x12HealthCheckRequest\"%\n\x13HealthCheckResponse\x12\x0e\n\x06status\x18\x01 \x01(\t2N\n\nLLMService\x12@\n\rGetCompletion\x12\x16.llm.CompletionRequest\x1a\x17.llm.CompletionResponse2P\n\x12HealthCheckService\x12:\n\x05\x43heck\x12\x17.llm.HealthCheckRequest\x1a\x18.llm.HealthCheckResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'llm_service_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_GETLLMREQUEST']._serialized_start=26
-  _globals['_GETLLMREQUEST']._serialized_end=74
-  _globals['_GETLLMRESPONSE']._serialized_start=76
-  _globals['_GETLLMRESPONSE']._serialized_end=126
-  _globals['_HEALTHCHECKREQUEST']._serialized_start=128
-  _globals['_HEALTHCHECKREQUEST']._serialized_end=148
-  _globals['_HEALTHCHECKRESPONSE']._serialized_start=150
-  _globals['_HEALTHCHECKRESPONSE']._serialized_end=187
-  _globals['_LLMSERVICE']._serialized_start=189
-  _globals['_LLMSERVICE']._serialized_end=252
-  _globals['_HEALTHCHECKSERVICE']._serialized_start=254
-  _globals['_HEALTHCHECKSERVICE']._serialized_end=334
+  _globals['_COMPLETIONREQUEST']._serialized_start=26
+  _globals['_COMPLETIONREQUEST']._serialized_end=147
+  _globals['_COMPLETIONRESPONSE']._serialized_start=150
+  _globals['_COMPLETIONRESPONSE']._serialized_end=285
+  _globals['_HEALTHCHECKREQUEST']._serialized_start=287
+  _globals['_HEALTHCHECKREQUEST']._serialized_end=307
+  _globals['_HEALTHCHECKRESPONSE']._serialized_start=309
+  _globals['_HEALTHCHECKRESPONSE']._serialized_end=346
+  _globals['_LLMSERVICE']._serialized_start=348
+  _globals['_LLMSERVICE']._serialized_end=426
+  _globals['_HEALTHCHECKSERVICE']._serialized_start=428
+  _globals['_HEALTHCHECKSERVICE']._serialized_end=508
 # @@protoc_insertion_point(module_scope)

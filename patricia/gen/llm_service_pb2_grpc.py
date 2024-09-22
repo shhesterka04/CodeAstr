@@ -34,17 +34,17 @@ class LLMServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.GetLLM = channel.unary_unary(
-                '/llm.LLMService/GetLLM',
-                request_serializer=llm__service__pb2.GetLLMRequest.SerializeToString,
-                response_deserializer=llm__service__pb2.GetLLMResponse.FromString,
+        self.GetCompletion = channel.unary_unary(
+                '/llm.LLMService/GetCompletion',
+                request_serializer=llm__service__pb2.CompletionRequest.SerializeToString,
+                response_deserializer=llm__service__pb2.CompletionResponse.FromString,
                 _registered_method=True)
 
 
 class LLMServiceServicer(object):
     """Missing associated documentation comment in .proto file."""
 
-    def GetLLM(self, request, context):
+    def GetCompletion(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -53,10 +53,10 @@ class LLMServiceServicer(object):
 
 def add_LLMServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'GetLLM': grpc.unary_unary_rpc_method_handler(
-                    servicer.GetLLM,
-                    request_deserializer=llm__service__pb2.GetLLMRequest.FromString,
-                    response_serializer=llm__service__pb2.GetLLMResponse.SerializeToString,
+            'GetCompletion': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetCompletion,
+                    request_deserializer=llm__service__pb2.CompletionRequest.FromString,
+                    response_serializer=llm__service__pb2.CompletionResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -70,7 +70,7 @@ class LLMService(object):
     """Missing associated documentation comment in .proto file."""
 
     @staticmethod
-    def GetLLM(request,
+    def GetCompletion(request,
             target,
             options=(),
             channel_credentials=None,
@@ -83,9 +83,9 @@ class LLMService(object):
         return grpc.experimental.unary_unary(
             request,
             target,
-            '/llm.LLMService/GetLLM',
-            llm__service__pb2.GetLLMRequest.SerializeToString,
-            llm__service__pb2.GetLLMResponse.FromString,
+            '/llm.LLMService/GetCompletion',
+            llm__service__pb2.CompletionRequest.SerializeToString,
+            llm__service__pb2.CompletionResponse.FromString,
             options,
             channel_credentials,
             insecure,

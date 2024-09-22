@@ -3,21 +3,27 @@ syntax = "proto3";
 package llm;
 
 service LLMService {
-    rpc GetLLM(GetLLMRequest) returns (GetLLMResponse);
+  rpc GetCompletion(CompletionRequest) returns (CompletionResponse);
+}
+
+message CompletionRequest {
+  string model = 1;
+  float temperature = 2;
+  int32 max_tokens = 3;
+  string system_message = 4;
+  string user_message = 5;
+}
+
+message CompletionResponse {
+  string result = 1;
+  int32 input_text_tokens = 2;
+  int32 completion_tokens = 3;
+  int32 total_tokens = 4;
+  string model_version = 5;
 }
 
 service HealthCheckService {
     rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
-}
-
-message GetLLMRequest {
-    string user_id = 1;
-    string prompt = 2;
-}
-
-message GetLLMResponse {
-    string answer = 1;
-    string raw_json = 2;
 }
 
 message HealthCheckRequest {}

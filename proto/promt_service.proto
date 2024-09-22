@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package promt;
+
+import "google/protobuf/wrappers.proto";
+
+service PromptHandlerService {
+  rpc HandlePrompt(PromptRequest) returns (PromptResponse);
+}
+
+message PromptRequest {
+  string user_id = 1;
+  int32 tokens = 2;
+  google.protobuf.StringValue birth_date = 3;
+  google.protobuf.StringValue birth_place = 4;
+  google.protobuf.StringValue birth_time = 5;
+  string zodiac_sign = 6;
+  string command = 7;
+}
+
+message PromptResponse {
+  int32 tokens_spent = 1;
+  string response = 2;
+}
