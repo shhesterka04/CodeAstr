@@ -4,6 +4,7 @@ go 1.22
 
 require (
 	github.com/georgysavva/scany v1.2.2
+	github.com/go-telegram-bot-api/telegram-bot-api/v5 v5.5.1
 	github.com/jackc/pgconn v1.14.3
 	github.com/jackc/pgx/v4 v4.18.3
 	github.com/pkg/errors v0.9.1
