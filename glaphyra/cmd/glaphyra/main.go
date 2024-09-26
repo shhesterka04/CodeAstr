@@ -7,6 +7,7 @@ import (
 	"glaphyra/internal/app/users/dto"
 	"glaphyra/internal/app/users/repository"
 	"glaphyra/internal/app/users/service"
+	"glaphyra/internal/pkg/bot"
 	"glaphyra/internal/pkg/db"
 )
 
@@ -32,6 +33,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	b, err := bot.NewBot("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+	if err != nil {
+		log.Fatalf("Error creating bot: %v", err)
+	}
+
+	b.Start()
 
 	log.Println(user)
 }
