@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
+	"log"
+
 	"glaphyra/internal/app/users/dto"
 	"glaphyra/internal/app/users/repository"
 	"glaphyra/internal/app/users/service"
 	"glaphyra/internal/pkg/bot"
 	"glaphyra/internal/pkg/db"
-	"log"
 )
 
 func main() {
