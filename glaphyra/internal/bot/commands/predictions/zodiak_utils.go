@@ -19,9 +19,10 @@ var (
 	}
 
 	inlineKeyboard = tgbotapi.NewInlineKeyboardMarkup(
-		tgbotapi.NewInlineKeyboardRow(inlineButtons[0], inlineButtons[1], inlineButtons[2], inlineButtons[3]),
-		tgbotapi.NewInlineKeyboardRow(inlineButtons[4], inlineButtons[5], inlineButtons[6], inlineButtons[7]),
-		tgbotapi.NewInlineKeyboardRow(inlineButtons[8], inlineButtons[9], inlineButtons[10], inlineButtons[11]),
+		tgbotapi.NewInlineKeyboardRow(inlineButtons[0], inlineButtons[1], inlineButtons[2]),
+		tgbotapi.NewInlineKeyboardRow(inlineButtons[3], inlineButtons[4], inlineButtons[5]),
+		tgbotapi.NewInlineKeyboardRow(inlineButtons[6], inlineButtons[7], inlineButtons[8]),
+		tgbotapi.NewInlineKeyboardRow(inlineButtons[9], inlineButtons[10], inlineButtons[11]),
 	)
 )
 
