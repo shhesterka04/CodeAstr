@@ -6,9 +6,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const borderTop = "\n=========================\n\n"
-const borderBottom = "\n\n=========================\n"
-
 func WrapErr(err error) error {
 	if err == nil {
 		return nil
