@@ -1,6 +1,9 @@
 package bot
 
 import (
+	"log"
+	"sync"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"glaphyra/internal/bot/commands"
 	"glaphyra/internal/bot/commands/about"
@@ -12,7 +15,7 @@ const (
 	backCommand     = "Назад"
 )
 
-var commandHistory = &CommandHistory{}
+var userCommandHistories sync.Map
 
 type Commander interface {
 	Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message)
@@ -110,6 +113,19 @@ func (bh *Handler) handleUnknownCommand(api *tgbotapi.BotAPI, message *tgbotapi.
 }
 
 func HandleUpdate(api *tgbotapi.BotAPI, update tgbotapi.Update) {
+	var commandHistory *CommandHistory
+	if update.Message != nil {
+		userID := update.Message.From.ID
+		history, _ := userCommandHistories.LoadOrStore(userID, &CommandHistory{})
+		commandHistory = history.(*CommandHistory)
+		log.Printf("User %s is sending a message: %s", update.Message.From.UserName, update.Message.Text)
+	} else if update.CallbackQuery != nil {
+		userID := update.CallbackQuery.From.ID
+		history, _ := userCommandHistories.LoadOrStore(userID, &CommandHistory{})
+		commandHistory = history.(*CommandHistory)
+		log.Printf("User %s is sending a callback query: %s", update.CallbackQuery.From.UserName, update.CallbackQuery.Data)
+	}
+
 	bh := NewBotHandler(commandHistory)
 	if update.Message != nil {
 		bh.HandleCommand(api, update.Message)
@@ -124,7 +140,7 @@ type BackCommand struct {
 
 func (c *BackCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
 	previousCommand := c.commandHistory.Pop()
-	if previousCommand == nil {
+	if previousCommand == nil || previousCommand.PrevCmd == nil {
 		return
 	}
 
