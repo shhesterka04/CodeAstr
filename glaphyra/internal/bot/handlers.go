@@ -5,6 +5,7 @@ import (
 	"glaphyra/internal/bot/commands"
 	"glaphyra/internal/bot/commands/about"
 	"glaphyra/internal/bot/commands/predictions"
+	"log"
 )
 
 const (
@@ -112,8 +113,10 @@ func (bh *Handler) handleUnknownCommand(api *tgbotapi.BotAPI, message *tgbotapi.
 func HandleUpdate(api *tgbotapi.BotAPI, update tgbotapi.Update) {
 	bh := NewBotHandler(commandHistory)
 	if update.Message != nil {
+		log.Printf("User %s is sending a message: %s", update.Message.From.UserName, update.Message.Text)
 		bh.HandleCommand(api, update.Message)
 	} else if update.CallbackQuery != nil {
+		log.Printf("User %s is sending a callback query: %s", update.CallbackQuery.From.UserName, update.CallbackQuery.Data)
 		predictions.HandleCallbackQuery(api, update.CallbackQuery)
 	}
 }
@@ -124,7 +127,7 @@ type BackCommand struct {
 
 func (c *BackCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
 	previousCommand := c.commandHistory.Pop()
-	if previousCommand.PrevCmd == nil {
+	if previousCommand == nil || previousCommand.PrevCmd == nil {
 		return
 	}
 
