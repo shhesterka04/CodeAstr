@@ -3,9 +3,9 @@ package handlers
 import (
 	"github.com/pkg/errors"
 
-	"glaphyra/integration/llm/config"
-	yagpt "glaphyra/integration/llm/yagpt/client"
-	"glaphyra/integration/llm/yagpt/dto"
+	"glaphyra/config"
+	yagpt "glaphyra/internal/llm/yagpt/client"
+	"glaphyra/internal/llm/yagpt/dto"
 )
 
 type YaGPTHandler struct {

@@ -5,15 +5,15 @@ import (
 	"log"
 	"reflect"
 
-	"glaphyra/integration/llm"
-	yaml_config "glaphyra/integration/llm/config"
-	"glaphyra/integration/llm/handlers"
-	"glaphyra/integration/llm/yagpt/dto"
+	yaml_config "glaphyra/config"
+	"glaphyra/internal/llm"
+	"glaphyra/internal/llm/handlers"
+	"glaphyra/internal/llm/yagpt/dto"
 )
 
 // пример использования, потом удалить
 func main() {
-	config, err := yaml_config.LoadConfig("integration/llm/config/config.yaml")
+	config, err := yaml_config.LoadConfig("config/config.yaml")
 	if err != nil {
 		log.Fatalf("Failed to load config: %v", err)
 	}

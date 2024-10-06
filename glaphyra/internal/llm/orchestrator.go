@@ -3,7 +3,7 @@ package llm
 import (
 	"github.com/pkg/errors"
 
-	"glaphyra/integration/llm/handlers"
+	"glaphyra/internal/llm/handlers"
 )
 
 // Orchestrator управляет всеми ручками для работы с разными апи

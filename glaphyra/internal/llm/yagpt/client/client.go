@@ -9,8 +9,8 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
-	"glaphyra/integration/llm/config"
-	"glaphyra/integration/llm/yagpt/dto"
+	"glaphyra/config"
+	"glaphyra/internal/llm/yagpt/dto"
 )
 
 // пока хардкод мб в конфиг надо
