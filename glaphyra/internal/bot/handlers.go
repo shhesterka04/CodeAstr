@@ -1,78 +1,148 @@
 package bot
 
 import (
+	"log"
+	"sync"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"glaphyra/internal/bot/commands"
 	"glaphyra/internal/bot/commands/about"
 	"glaphyra/internal/bot/commands/predictions"
 )
 
-type Command interface {
+const (
+	maxLimitHistory = 5
+	backCommand     = "Назад"
+)
+
+var userCommandHistories sync.Map
+
+type Commander interface {
 	Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message)
 }
 
-var (
-	registry           = NewCommandRegistry()
-	previousCommand    Command
-	prePreviousCommand Command
-)
+type Command struct {
+	Cmd     Commander
+	PrevCmd Commander
+}
 
-func init() {
-	registry.Register("/start", &cmd.StartCommand{})
-	registry.Register("Назад", &BackCommand{})
+type Handler struct {
+	registry       *CommandRegistry
+	commandHistory *CommandHistory
+}
 
-	registry.Register("Предсказания", &cmd.PredictionsCommand{})
-	registry.Register("Совместимость", &cmd.CompatibilityCommand{})
-	registry.Register("Регистрация и настройки", &cmd.SettingsCommand{})
-	registry.Register("О боте", &cmd.AboutCommand{})
+type CommandHistory struct {
+	commands []*Command
+}
+
+func (ch *CommandHistory) Add(command *Command) {
+	ch.commands = append([]*Command{command}, ch.commands...)
+	if len(ch.commands) > maxLimitHistory {
+		ch.commands = ch.commands[:maxLimitHistory]
+	}
+}
+
+func (ch *CommandHistory) Pop() *Command {
+	if len(ch.commands) == 0 {
+		return nil
+	}
+
+	command := ch.commands[0]
+	ch.commands = ch.commands[1:]
+	return command
+}
+
+func (ch *CommandHistory) GetPrevious() *Command {
+	if len(ch.commands) == 0 {
+		return nil
+	}
+
+	return ch.commands[0]
+}
+
+func NewBotHandler(commandHistory *CommandHistory) *Handler {
+	bh := &Handler{
+		registry:       NewCommandRegistry(),
+		commandHistory: commandHistory,
+	}
+
+	bh.registerCommands()
+	return bh
+}
+
+func (bh *Handler) registerCommands() {
+	bh.registry.Register("/start", &Command{Cmd: &cmd.StartCommand{}, PrevCmd: nil})
+	bh.registry.Register(backCommand, &Command{Cmd: &BackCommand{commandHistory: bh.commandHistory}, PrevCmd: nil})
+
+	bh.registry.Register("Предсказания", &Command{Cmd: &cmd.PredictionsCommand{}, PrevCmd: &cmd.StartCommand{}})
+	bh.registry.Register("Совместимость", &Command{Cmd: &cmd.CompatibilityCommand{}, PrevCmd: &cmd.StartCommand{}})
+	bh.registry.Register("Регистрация и настройки", &Command{Cmd: &cmd.SettingsCommand{}, PrevCmd: &cmd.StartCommand{}})
+	bh.registry.Register("О боте", &Command{Cmd: &cmd.AboutCommand{}, PrevCmd: &cmd.StartCommand{}})
 
 	// О боте
-	registry.Register("Кто я?", &about.WhoAmICommand{})
-	registry.Register("Функции", &about.FunctionsCommand{})
-	registry.Register("Обратная связь", &about.FeedbackCommand{})
+	bh.registry.Register("Кто я?", &Command{Cmd: &about.WhoAmICommand{}, PrevCmd: &cmd.StartCommand{}})
+	bh.registry.Register("Функции", &Command{Cmd: &about.FunctionsCommand{}, PrevCmd: &cmd.StartCommand{}})
+	bh.registry.Register("Обратная связь", &Command{Cmd: &about.FeedbackCommand{}, PrevCmd: &cmd.StartCommand{}})
 
 	// Предсказания
-	registry.Register("Гороскоп на день", &predictions.DayHoroscopeCommand{})
-	registry.Register("Гороскоп на неделю", &predictions.WeekHoroscopeCommand{})
-	registry.Register("Гороскоп на месяц", &predictions.MonthHoroscopeCommand{})
+	bh.registry.Register("Гороскоп на день", &Command{Cmd: &predictions.DayHoroscopeCommand{}, PrevCmd: &cmd.PredictionsCommand{}})
+	bh.registry.Register("Гороскоп на неделю", &Command{Cmd: &predictions.WeekHoroscopeCommand{}, PrevCmd: &cmd.PredictionsCommand{}})
+	bh.registry.Register("Гороскоп на месяц", &Command{Cmd: &predictions.MonthHoroscopeCommand{}, PrevCmd: &cmd.PredictionsCommand{}})
 }
 
-func HandleCommand(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
-	command := registry.Get(message.Text)
-	if message.Text == "Назад" {
-		command = prePreviousCommand
-	}
+func (bh *Handler) HandleCommand(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
+	command := bh.registry.Get(message.Text)
 
 	if command != nil {
-		command.Execute(api, message)
-		prePreviousCommand = previousCommand
-		previousCommand = command
+		previousCommand := bh.commandHistory.GetPrevious()
+		if previousCommand != nil && command.Cmd == previousCommand.Cmd {
+			return
+		}
+		command.Cmd.Execute(api, message)
+		if message.Text != backCommand {
+			bh.commandHistory.Add(command)
+		}
 	} else {
-		handleUnknownCommand(api, message)
+		bh.handleUnknownCommand(api, message)
 	}
 }
 
-func handleUnknownCommand(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
+func (bh *Handler) handleUnknownCommand(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
 	msg := tgbotapi.NewMessage(message.Chat.ID, "Я не понимаю (кто понял тот понял)")
 	api.Send(msg)
 }
 
-type BackCommand struct{}
-
-func (c *BackCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
-	if prePreviousCommand == nil {
-		msg := tgbotapi.NewMessage(message.Chat.ID, "No previous command")
-		api.Send(msg)
-		return
+func HandleUpdate(api *tgbotapi.BotAPI, update tgbotapi.Update) {
+	var commandHistory *CommandHistory
+	if update.Message != nil {
+		userID := update.Message.From.ID
+		history, _ := userCommandHistories.LoadOrStore(userID, &CommandHistory{})
+		commandHistory = history.(*CommandHistory)
+		log.Printf("User %s is sending a message: %s", update.Message.From.UserName, update.Message.Text)
+	} else if update.CallbackQuery != nil {
+		userID := update.CallbackQuery.From.ID
+		history, _ := userCommandHistories.LoadOrStore(userID, &CommandHistory{})
+		commandHistory = history.(*CommandHistory)
+		log.Printf("User %s is sending a callback query: %s", update.CallbackQuery.From.UserName, update.CallbackQuery.Data)
 	}
 
-	prePreviousCommand.Execute(api, message)
-}
-
-func HandleUpdate(api *tgbotapi.BotAPI, update tgbotapi.Update) {
+	bh := NewBotHandler(commandHistory)
 	if update.Message != nil {
-		HandleCommand(api, update.Message)
+		bh.HandleCommand(api, update.Message)
 	} else if update.CallbackQuery != nil {
 		predictions.HandleCallbackQuery(api, update.CallbackQuery)
 	}
+}
+
+type BackCommand struct {
+	commandHistory *CommandHistory
+}
+
+func (c *BackCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
+	previousCommand := c.commandHistory.Pop()
+	if previousCommand == nil || previousCommand.PrevCmd == nil {
+		return
+	}
+
+	previousCommand.PrevCmd.Execute(api, message)
 }

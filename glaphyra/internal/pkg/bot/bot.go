@@ -25,6 +25,8 @@ func (b *Bot) Start() {
 	updates := b.api.GetUpdatesChan(u)
 
 	for update := range updates {
-		bot.HandleUpdate(b.api, update)
+		go func(update tgbotapi.Update) {
+			bot.HandleUpdate(b.api, update)
+		}(update)
 	}
 }

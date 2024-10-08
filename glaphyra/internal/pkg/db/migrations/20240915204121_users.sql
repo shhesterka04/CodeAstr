@@ -1,13 +1,18 @@
 -- +goose Up
-create table users (
-    id bigint not null primary key,
-    first_name text not null,
-    last_name text not null,
-    middle_name text,
-    created_at timestamp default now()
+CREATE TABLE users (
+    tg_id INT PRIMARY KEY,
+    username TEXT,
+    type VARCHAR(10) CHECK (type IN ('user', 'moderator')),
+    style TEXT,
+    gender TEXT,
+    registration_date DATE,
+    birth_date DATE,
+    zodiac_sign TEXT,
+    birth_time TIME,
+    birth_place TEXT,
+    friend_code TEXT,
+    tokens INT
 );
-CREATE SEQUENCE users_id START 1;
 
 -- +goose Down
-drop table users;
-drop sequence users_id;
+DROP TABLE IF EXISTS users;

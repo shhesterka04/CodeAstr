@@ -6,9 +6,16 @@ import (
 )
 
 type User struct {
-	ID         uint64           `db:"id"`
-	Name       string           `db:"first_name"`
-	MiddleName sql.Null[string] `db:"middle_name"`
-	LastName   string           `db:"last_name"`
-	CreatedAt  time.Time        `db:"created_at"`
+	TgID             int32               `db:"tg_id"`
+	Username         string              `db:"username"`
+	Type             string              `db:"type"`
+	Style            sql.Null[string]    `db:"style"`
+	Gender           sql.Null[string]    `db:"gender"`
+	RegistrationDate time.Time           `db:"registration_date"`
+	BirthDate        sql.Null[time.Time] `db:"birth_date"`
+	ZodiacSign       sql.Null[string]    `db:"zodiac_sign"`
+	BirthTime        sql.Null[time.Time] `db:"birth_time"`
+	BirthPlace       sql.Null[string]    `db:"birth_place"`
+	FriendCode       sql.Null[string]    `db:"friend_code"`
+	Tokens           sql.Null[int32]     `db:"tokens"`
 }

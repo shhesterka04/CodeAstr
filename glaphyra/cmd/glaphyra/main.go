@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 
 	"glaphyra/internal/app/users/dto"
@@ -15,7 +16,17 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	database, err := db.NewDB(ctx, "postgres://test:test@localhost:5432/test?sslmode=disable") // TODO add
+	repoExample(ctx) // TODO remove
+
+	b, err := bot.NewBot("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+	if err != nil {
+		log.Fatalf("Error creating bot: %v", err)
+	}
+	b.Start()
+}
+
+func repoExample(ctx context.Context) {
+	database, err := db.NewDB(ctx, "postgres://test:test@localhost:5432/test?sslmode=disable") // TODO add to config
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,7 +35,10 @@ func main() {
 	repo := repository.NewRepository(database)
 	userService := service.NewUserService(repo)
 
-	err = userService.Insert(ctx, &dto.InsertUserRequest{Name: "Дмитрий", LastName: "Полевой", MiddleName: "ОпенСиВишевич"}) // TODO убрать безобразие
+	err = userService.Create(ctx, &dto.CreateUserRequest{
+		TgID: 1, Username: "Chmonya", Type: "user",
+	},
+	) // TODO убрать безобразие
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -33,13 +47,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println(user)
 
-	b, err := bot.NewBot("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+	err = userService.Update(ctx, &dto.UpdateUserRequest{
+		Gender:   "Мужик",
+		Username: "superCmonya",
+	})
 	if err != nil {
-		log.Fatalf("Error creating bot: %v", err)
+		log.Fatal(err)
 	}
 
-	b.Start()
-
-	log.Println(user)
+	err = userService.Delete(ctx, 1)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
