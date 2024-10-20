@@ -19,9 +19,9 @@ import (
 )
 
 type Repository interface {
-	FindByID(ctx context.Context, TgID int32) (*dto.User, error)
+	FindByID(ctx context.Context, TgID int64) (*dto.User, error)
 	Create(ctx context.Context, req *dto.CreateUserRequest) error
-	DeleteByID(ctx context.Context, TgID int32) error
+	DeleteByID(ctx context.Context, TgID int64) error
 	UpdateByTgID(ctx context.Context, req *dto.UpdateUserRequest) error
 }
 
@@ -35,7 +35,7 @@ func NewRepository(db db.DBops) Repository {
 	}
 }
 
-func (r *repository) FindByID(ctx context.Context, TgID int32) (*dto.User, error) {
+func (r *repository) FindByID(ctx context.Context, TgID int64) (*dto.User, error) {
 	var user model.User
 
 	query, args, err := buildFindByIDQuery(TgID).ToSql()
@@ -113,7 +113,7 @@ func (r *repository) Create(ctx context.Context, req *dto.CreateUserRequest) err
 	return nil
 }
 
-func (r *repository) DeleteByID(ctx context.Context, TgID int32) error {
+func (r *repository) DeleteByID(ctx context.Context, TgID int64) error {
 	query, args, err := sq.Delete(tables.Users).PlaceholderFormat(sq.Dollar).Where(sq.Eq{"tg_id": TgID}).ToSql()
 	if err != nil {
 		return log.Wrap(err)
@@ -134,7 +134,7 @@ func modelToDTO(user *model.User) *dto.User {
 	userDTO := dto.User{
 		TgID:             user.TgID,
 		Username:         user.Username,
-		Type:             user.Type,
+		Type:             dto.UserType(user.Type),
 		RegistrationDate: user.RegistrationDate,
 	}
 
@@ -173,7 +173,7 @@ func modelToDTO(user *model.User) *dto.User {
 	return &userDTO
 }
 
-func buildFindByIDQuery(tgID int32) sq.SelectBuilder {
+func buildFindByIDQuery(tgID int64) sq.SelectBuilder {
 	queryBuilder := sq.Select(
 		"tg_id",
 		"username",

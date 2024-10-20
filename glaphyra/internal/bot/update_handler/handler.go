@@ -1,0 +1,82 @@
+package update_handler
+
+import (
+	"encoding/json"
+	"fmt"
+	"glaphyra/internal/bot/commands/settings"
+	"log"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	userservice "glaphyra/internal/app/users/service"
+	"glaphyra/internal/bot"
+	cmd "glaphyra/internal/bot/commands"
+	"glaphyra/internal/bot/commands/about"
+	"glaphyra/internal/bot/commands/predictions"
+	"glaphyra/internal/bot/user_cmd_handler"
+)
+
+const backCommand = "Назад"
+
+type implUpdateHandler struct {
+	registry   *CommandRegistry
+	cmdHandler user_cmd_handler.UserCommandHandler
+}
+
+func NewUpdateHandler(cmdHandler user_cmd_handler.UserCommandHandler, userSrv userservice.UserService) bot.UpdateHandler {
+	i := &implUpdateHandler{
+		cmdHandler: cmdHandler,
+		registry:   NewCommandRegistry(),
+	}
+	i.registerCommands(userSrv)
+
+	return i
+}
+
+func (i *implUpdateHandler) HandleUpdate(update tgbotapi.Update) {
+	var userID int64
+	var command bot.Command
+	var message *tgbotapi.Message
+	switch {
+	case update.Message != nil:
+		userID = update.Message.From.ID
+		message = update.Message
+		command = i.registry.Get(update.Message.Text)
+	case update.CallbackQuery != nil:
+		bytes, _ := json.Marshal(update)
+		fmt.Println(string(bytes))
+		return
+	}
+
+	err := i.cmdHandler.HandleUserCommand(userID, command, message)
+	if err != nil {
+		log.Println(err)
+	}
+	return
+}
+
+func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService) {
+	i.registry.Register("/start", cmd.NewStartCommand(userSrv))
+	i.registry.Register(backCommand, &user_cmd_handler.BackCommand{})
+
+	i.registry.Register("Предсказания", &cmd.PredictionsCommand{})
+	i.registry.Register("Совместимость", &cmd.CompatibilityCommand{})
+	i.registry.Register("Регистрация и настройки", &cmd.SettingsCommand{})
+	i.registry.Register("О боте", &cmd.AboutCommand{})
+
+	// О боте
+	i.registry.Register("Кто я?", &about.WhoAmICommand{})
+	i.registry.Register("Функции", &about.FunctionsCommand{})
+	i.registry.Register("Обратная связь", &about.FeedbackCommand{})
+
+	// Предсказания
+	i.registry.Register("Гороскоп на день", &predictions.DayHoroscopeCommand{})
+	i.registry.Register("Гороскоп на неделю", &predictions.WeekHoroscopeCommand{})
+	i.registry.Register("Гороскоп на месяц", &predictions.MonthHoroscopeCommand{})
+
+	// Регистрация и настройки
+	i.registry.Register("Выбор стиля общения", &settings.StyleCommand{})
+	i.registry.Register("Серьезный стиль", settings.NewSetStyleCommand(userSrv, "Серьезный стиль"))
+	i.registry.Register("Шутливый стиль", settings.NewSetStyleCommand(userSrv, "Шутливый стиль"))
+	i.registry.Register("Дружелюбный стиль", settings.NewSetStyleCommand(userSrv, "Дружелюбный стиль"))
+
+}
