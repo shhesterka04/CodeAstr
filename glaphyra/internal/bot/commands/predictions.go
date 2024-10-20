@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"glaphyra/internal/pkg/log"
 	"math/rand"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 
 type PredictionsCommand struct{}
 
-func (c *PredictionsCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
+func (c *PredictionsCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
 	predictionMessages := []string{
 		"Предсказания — это твой личный звездный советник! 🪐 Узнай, что звезды готовят для тебя сегодня, на неделю или даже на месяц. Выбери тип предсказания!",
 		"Звёзды говорят... 💫 Выбирай, какой прогноз тебя интересует: на день, неделю или даже месяц. Я расскажу тебе все секреты планет!",
@@ -43,5 +44,14 @@ func (c *PredictionsCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Mes
 	keyboard := tgbotapi.NewReplyKeyboard(buttons...)
 	msg.ReplyMarkup = keyboard
 
-	api.Send(msg)
+	_, err := api.Send(msg)
+	if err != nil {
+		return log.Wrap(err)
+	}
+
+	return nil
+}
+
+func (c *PredictionsCommand) IsTransfer() bool {
+	return true
 }

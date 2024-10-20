@@ -1,6 +1,7 @@
 package predictions
 
 import (
+	"glaphyra/internal/pkg/log"
 	"math/rand"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 
 type WeekHoroscopeCommand struct{}
 
-func (c *WeekHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
+func (c *WeekHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
 	weekMessages := []string{
 		"Заглянем на неделю вперед? 📅 Узнай, какие события ожидают тебя в ближайшие 7 дней!",
 		"Интересно, что звезды предсказывают на ближайшие 7 дней? 📅 Давай заглянем в будущее на неделю вперед!",
@@ -22,7 +23,10 @@ func (c *WeekHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.M
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, weekMessage)
 	msg.ReplyMarkup = inlineKeyboard
-	api.Send(msg)
+	_, err := api.Send(msg) // todo нормально хэндлить ошибку
+	if err != nil {
+		return log.Wrap(err)
+	}
 
 	backButtonMsg := tgbotapi.NewMessage(message.Chat.ID, "Нажмите 'Назад' для возврата")
 	backButtonMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -30,7 +34,17 @@ func (c *WeekHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.M
 			tgbotapi.NewKeyboardButton("Назад"),
 		),
 	)
-	api.Send(backButtonMsg)
+
+	_, err = api.Send(backButtonMsg)
+	if err != nil {
+		return log.Wrap(err)
+	}
+
+	return nil
+}
+
+func (c *WeekHoroscopeCommand) IsTransfer() bool {
+	return true
 }
 
 //TODO: кнопка назад плохо реализована, надо ее переледать - иначе на этой стадии зацикливание

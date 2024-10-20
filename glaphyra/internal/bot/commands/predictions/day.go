@@ -1,6 +1,7 @@
 package predictions
 
 import (
+	"glaphyra/internal/pkg/log"
 	"math/rand"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 
 type DayHoroscopeCommand struct{}
 
-func (c *DayHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
+func (c *DayHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
 	dayMessages := []string{
 		"Каждый день звезды готовят что-то особенное. 🌞 Хочешь узнать, что ждет тебя сегодня? Введи свой знак зодиака!",
 		"Каждый день полон астрологических загадок! 🌅 Давай посмотрим, что ждет тебя сегодня. Введи свой знак зодиака.",
@@ -22,7 +23,10 @@ func (c *DayHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Me
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, dayMessage)
 	msg.ReplyMarkup = inlineKeyboard
-	api.Send(msg)
+	_, err := api.Send(msg) // todo нормально хэндлить ошибку
+	if err != nil {
+		return log.Wrap(err)
+	}
 
 	backButtonMsg := tgbotapi.NewMessage(message.Chat.ID, "Нажмите 'Назад' для возврата")
 	backButtonMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -30,5 +34,14 @@ func (c *DayHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Me
 			tgbotapi.NewKeyboardButton("Назад"),
 		),
 	)
-	api.Send(backButtonMsg)
+	_, err = api.Send(backButtonMsg)
+	if err != nil {
+		return log.Wrap(err)
+	}
+
+	return nil
+}
+
+func (c *DayHoroscopeCommand) IsTransfer() bool {
+	return true
 }
