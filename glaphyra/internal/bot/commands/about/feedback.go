@@ -1,6 +1,7 @@
 package about
 
 import (
+	"glaphyra/internal/pkg/log"
 	"math/rand"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 
 type FeedbackCommand struct{}
 
-func (c *FeedbackCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
+func (c *FeedbackCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
 	feedbackMessages := []string{
 		"Тебе есть, что мне сказать? 💬 Я всегда готов выслушать твои отзывы и предложения.",
 		"У тебя есть вопросы или предложения? 💬 Я всегда готов выслушать твоё мнение!",
@@ -22,15 +23,24 @@ func (c *FeedbackCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Messag
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, feedbackMessage)
 
-	//buttons := [][]tgbotapi.KeyboardButton{
-	//	{tgbotapi.NewKeyboardButton("Подтвердить"), tgbotapi.NewKeyboardButton("Назад")},
-	//}
+	buttons := [][]tgbotapi.KeyboardButton{
+		{tgbotapi.NewKeyboardButton("Подтвердить"), tgbotapi.NewKeyboardButton("Назад")},
+	}
 
-	//keyboard := tgbotapi.NewReplyKeyboard(buttons...)
-	//msg.ReplyMarkup = keyboard
+	keyboard := tgbotapi.NewReplyKeyboard(buttons...)
+	msg.ReplyMarkup = keyboard
 
-	api.Send(msg)
+	_, err := api.Send(msg)
+	if err != nil {
+		return log.Wrap(err)
+	}
+
+	return nil
 
 	//TODO: тут невалидная кнопка Назад из-за подтвердить
 	//TODO: добавить логику принятия сообщения и отправки ее куда-то. Нужна кнопка "Подтвердить" и "назад"
+}
+
+func (c *FeedbackCommand) IsTransfer() bool {
+	return false
 }

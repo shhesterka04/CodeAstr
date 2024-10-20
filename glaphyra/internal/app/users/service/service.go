@@ -9,10 +9,10 @@ import (
 )
 
 type UserService interface {
-	FindByID(ctx context.Context, tgID int32) (*dto.User, error)
+	FindByID(ctx context.Context, tgID int64) (*dto.User, error)
 	Create(ctx context.Context, req *dto.CreateUserRequest) error
 	Update(ctx context.Context, req *dto.UpdateUserRequest) error
-	Delete(ctx context.Context, tgID int32) error
+	Delete(ctx context.Context, tgID int64) error
 }
 
 type implementSrv struct {
@@ -25,7 +25,7 @@ func NewUserService(repo usersrepository.Repository) UserService {
 	}
 }
 
-func (i *implementSrv) FindByID(ctx context.Context, tgID int32) (*dto.User, error) {
+func (i *implementSrv) FindByID(ctx context.Context, tgID int64) (*dto.User, error) {
 	user, err := i.repo.FindByID(ctx, tgID)
 	if err != nil {
 		return nil, log.Wrap(err)
@@ -52,7 +52,7 @@ func (i *implementSrv) Update(ctx context.Context, req *dto.UpdateUserRequest) e
 	return nil
 }
 
-func (i *implementSrv) Delete(ctx context.Context, tgID int32) error {
+func (i *implementSrv) Delete(ctx context.Context, tgID int64) error {
 	err := i.repo.DeleteByID(ctx, tgID)
 	if err != nil {
 		return log.Wrap(err)

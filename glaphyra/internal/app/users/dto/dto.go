@@ -8,10 +8,23 @@ import (
 
 const DefaultUsername = "Звездочет ебучий"
 
+type UserType string
+
+const (
+	DefaultUser = UserType("user")
+	Admin       = UserType("admin")
+)
+
+const (
+	FriendlyStyle = "Дружелюбный стиль"
+	SeriousStyle  = "Серьезный стиль"
+	FunnyStyle    = "Шутливый стиль"
+)
+
 type User struct {
 	TgID             int32
 	Username         string
-	Type             string
+	Type             UserType
 	Style            string
 	Gender           string
 	RegistrationDate time.Time
@@ -24,13 +37,13 @@ type User struct {
 }
 
 type CreateUserRequest struct {
-	TgID     int32
+	TgID     int64
 	Username string
-	Type     string
+	Type     UserType
 }
 
 type UpdateUserRequest struct {
-	TgID       int32
+	TgID       int64
 	Username   string
 	Style      string
 	Gender     string

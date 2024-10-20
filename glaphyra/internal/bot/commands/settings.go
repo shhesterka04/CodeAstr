@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"glaphyra/internal/pkg/log"
 	"math/rand"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 
 type SettingsCommand struct{}
 
-func (c *SettingsCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
+func (c *SettingsCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
 	settingsMessages := []string{
 		"Здесь ты можешь настроить свой опыт общения со мной. 🤖 Я запомню твои предпочтения и буду отправлять тебе прогнозы в нужное время.",
 		"Твой звездный опыт начинается здесь! 🔧 Настрой меня под себя: введи свою дату рождения и выбери, как я буду отправлять тебе прогнозы.",
@@ -39,5 +40,14 @@ func (c *SettingsCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Messag
 	keyboard := tgbotapi.NewReplyKeyboard(buttons...)
 	msg.ReplyMarkup = keyboard
 
-	api.Send(msg)
+	_, err := api.Send(msg)
+	if err != nil {
+		return log.Wrap(err)
+	}
+
+	return nil
+}
+
+func (c *SettingsCommand) IsTransfer() bool {
+	return true
 }
