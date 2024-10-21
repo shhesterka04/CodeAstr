@@ -1,6 +1,7 @@
 package predictions
 
 import (
+	"glaphyra/internal/pkg/log"
 	"math/rand"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 
 type MonthHoroscopeCommand struct{}
 
-func (c *MonthHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
+func (c *MonthHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
 	monthMessages := []string{
 		"Месяц — это длинное путешествие. 🚀 Готов увидеть, как будут развиваться события? Звезды уже знают!",
 		"Готов к большому астрологическому прогнозу? 🌓 Узнаем, как пройдёт этот месяц по звёздам!",
@@ -22,7 +23,10 @@ func (c *MonthHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, monthMessage)
 	msg.ReplyMarkup = inlineKeyboard
-	api.Send(msg)
+	_, err := api.Send(msg) // todo нормально хэндлить ошибку
+	if err != nil {
+		return log.Wrap(err)
+	}
 
 	backButtonMsg := tgbotapi.NewMessage(message.Chat.ID, "Нажмите 'Назад' для возврата")
 	backButtonMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -30,5 +34,14 @@ func (c *MonthHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.
 			tgbotapi.NewKeyboardButton("Назад"),
 		),
 	)
-	api.Send(backButtonMsg)
+	_, err = api.Send(backButtonMsg)
+	if err != nil {
+		return log.Wrap(err)
+	}
+
+	return nil
+}
+
+func (c *MonthHoroscopeCommand) IsTransfer() bool {
+	return true
 }

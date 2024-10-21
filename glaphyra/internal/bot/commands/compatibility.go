@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"glaphyra/internal/pkg/log"
 	"math/rand"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 
 type CompatibilityCommand struct{}
 
-func (c *CompatibilityCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
+func (c *CompatibilityCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
 	compatibilityMessages := []string{
 		"Любопытно, как звезды влияют на твои отношения с другими? 💞 Узнай, насколько вы совместимы!",
 		"Интересно, как звезды влияют на ваши отношения? 💕 Давай узнаем вашу совместимость по знакам зодиака!",
@@ -35,5 +36,14 @@ func (c *CompatibilityCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.M
 	keyboard := tgbotapi.NewReplyKeyboard(buttons...)
 	msg.ReplyMarkup = keyboard
 
-	api.Send(msg)
+	_, err := api.Send(msg)
+	if err != nil {
+		return log.Wrap(err)
+	}
+
+	return nil
+}
+
+func (c *CompatibilityCommand) IsTransfer() bool {
+	return true
 }

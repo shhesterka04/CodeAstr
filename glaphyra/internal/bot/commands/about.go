@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"glaphyra/internal/pkg/log"
 	"math/rand"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 
 type AboutCommand struct{}
 
-func (c *AboutCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
+func (c *AboutCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
 	aboutMessages := []string{
 		"Я создан, чтобы помогать тебе находить ответы среди звёзд и планет. 🌌 Узнай больше обо мне и о том, как я могу быть полезен.",
 		"Я твой проводник по звёздам и планетам! 🌠 Узнай обо мне больше и посмотри, как я могу помочь тебе.",
@@ -38,5 +39,14 @@ func (c *AboutCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) 
 	keyboard := tgbotapi.NewReplyKeyboard(buttons...)
 	msg.ReplyMarkup = keyboard
 
-	api.Send(msg)
+	_, err := api.Send(msg)
+	if err != nil {
+		return log.Wrap(err)
+	}
+
+	return nil
+}
+
+func (c *AboutCommand) IsTransfer() bool {
+	return true
 }
