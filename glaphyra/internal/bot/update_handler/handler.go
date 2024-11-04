@@ -68,7 +68,7 @@ func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService) {
 	// О боте
 	i.registry.Register("Кто я?", &about.WhoAmICommand{})
 	i.registry.Register("Функции", &about.FunctionsCommand{})
-	i.registry.Register("Обратная связь", &about.FeedbackCommand{})
+	i.registry.Register("Обратная связь", about.NewFeedbackCommand(userSrv))
 
 	// Предсказания
 	i.registry.Register("Гороскоп на день", &predictions.DayHoroscopeCommand{})
@@ -80,5 +80,6 @@ func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService) {
 	i.registry.Register("Серьезный стиль", settings.NewSetStyleCommand(userSrv, "Серьезный стиль"))
 	i.registry.Register("Шутливый стиль", settings.NewSetStyleCommand(userSrv, "Шутливый стиль"))
 	i.registry.Register("Дружелюбный стиль", settings.NewSetStyleCommand(userSrv, "Дружелюбный стиль"))
+	i.registry.Register("Ввод даты рождения", settings.NewBirthCommand(userSrv))
 
 }
