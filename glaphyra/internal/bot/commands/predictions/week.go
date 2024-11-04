@@ -50,12 +50,12 @@ func (c *WeekHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.M
 		),
 	)
 
-	sentMsg, err = api.Send(backButtonMsg)
+	_, err = api.Send(backButtonMsg)
 	if err != nil {
 		return 0, log.Wrap(err)
 	}
 
-	return sentMsg.Chat.ID, nil
+	return int64(sentMsg.MessageID), nil
 }
 
 func (c *WeekHoroscopeCommand) SendPromt(api *tgbotapi.BotAPI, callback *tgbotapi.CallbackQuery) error {
