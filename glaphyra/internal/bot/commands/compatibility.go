@@ -10,7 +10,7 @@ import (
 
 type CompatibilityCommand struct{}
 
-func (c *CompatibilityCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
+func (c *CompatibilityCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
 	compatibilityMessages := []string{
 		"Любопытно, как звезды влияют на твои отношения с другими? 💞 Узнай, насколько вы совместимы!",
 		"Интересно, как звезды влияют на ваши отношения? 💕 Давай узнаем вашу совместимость по знакам зодиака!",
@@ -38,10 +38,10 @@ func (c *CompatibilityCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.M
 
 	_, err := api.Send(msg)
 	if err != nil {
-		return log.Wrap(err)
+		return 0, log.Wrap(err)
 	}
 
-	return nil
+	return 0, nil
 }
 
 func (c *CompatibilityCommand) IsTransfer() bool {

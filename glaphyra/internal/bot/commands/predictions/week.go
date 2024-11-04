@@ -10,7 +10,7 @@ import (
 
 type WeekHoroscopeCommand struct{}
 
-func (c *WeekHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
+func (c *WeekHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
 	weekMessages := []string{
 		"Заглянем на неделю вперед? 📅 Узнай, какие события ожидают тебя в ближайшие 7 дней!",
 		"Интересно, что звезды предсказывают на ближайшие 7 дней? 📅 Давай заглянем в будущее на неделю вперед!",
@@ -23,9 +23,9 @@ func (c *WeekHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.M
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, weekMessage)
 	msg.ReplyMarkup = inlineKeyboard
-	_, err := api.Send(msg) // todo нормально хэндлить ошибку
+	sentMsg, err := api.Send(msg) // todo нормально хэндлить ошибку
 	if err != nil {
-		return log.Wrap(err)
+		return 0, log.Wrap(err)
 	}
 
 	backButtonMsg := tgbotapi.NewMessage(message.Chat.ID, "Нажмите 'Назад' для возврата")
@@ -35,12 +35,12 @@ func (c *WeekHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.M
 		),
 	)
 
-	_, err = api.Send(backButtonMsg)
+	sentMsg, err = api.Send(backButtonMsg)
 	if err != nil {
-		return log.Wrap(err)
+		return 0, log.Wrap(err)
 	}
 
-	return nil
+	return sentMsg.Chat.ID, nil
 }
 
 func (c *WeekHoroscopeCommand) IsTransfer() bool {

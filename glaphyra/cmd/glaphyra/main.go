@@ -23,7 +23,7 @@ func main() {
 	repo := repository.NewRepository(database)
 	userService := service.NewUserService(repo)
 
-	b, err := bot.NewBot("123", userService)
+	b, err := bot.NewBot("8096088977:AAEQJYPk2ihyfZ2badyeCfop_6oW8G78tRU", userService)
 	if err != nil {
 		log.Fatalf("Error creating bot: %v", err)
 	}

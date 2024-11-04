@@ -10,7 +10,7 @@ import (
 
 type FeedbackCommand struct{}
 
-func (c *FeedbackCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
+func (c *FeedbackCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
 	feedbackMessages := []string{
 		"Тебе есть, что мне сказать? 💬 Я всегда готов выслушать твои отзывы и предложения.",
 		"У тебя есть вопросы или предложения? 💬 Я всегда готов выслушать твоё мнение!",
@@ -32,10 +32,10 @@ func (c *FeedbackCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Messag
 
 	_, err := api.Send(msg)
 	if err != nil {
-		return log.Wrap(err)
+		return 0, log.Wrap(err)
 	}
 
-	return nil
+	return 0, nil
 
 	//TODO: тут невалидная кнопка Назад из-за подтвердить
 	//TODO: добавить логику принятия сообщения и отправки ее куда-то. Нужна кнопка "Подтвердить" и "назад"

@@ -1,8 +1,6 @@
 package update_handler
 
 import (
-	"encoding/json"
-	"fmt"
 	"glaphyra/internal/bot/commands/settings"
 	"log"
 
@@ -42,8 +40,12 @@ func (i *implUpdateHandler) HandleUpdate(update tgbotapi.Update) {
 		message = update.Message
 		command = i.registry.Get(update.Message.Text)
 	case update.CallbackQuery != nil:
-		bytes, _ := json.Marshal(update)
-		fmt.Println(string(bytes))
+		userID = update.CallbackQuery.From.ID
+		messageID := update.CallbackQuery.Message.MessageID
+		err := i.cmdHandler.HandleUserCallback(int64(messageID), update.CallbackQuery)
+		if err != nil {
+			log.Println(err)
+		}
 		return
 	}
 

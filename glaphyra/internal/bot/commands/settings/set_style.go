@@ -22,7 +22,7 @@ func NewSetStyleCommand(userSrv userservice.UserService, style string) *SetStyle
 	}
 }
 
-func (c *SetStyleCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
+func (c *SetStyleCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
 	ctx := context.Background()
 	err := c.userSrv.Update(
 		ctx,
@@ -32,7 +32,7 @@ func (c *SetStyleCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Messag
 		},
 	)
 	if err != nil {
-		return log.WrapErr(err)
+		return 0, log.WrapErr(err)
 	}
 
 	styleMessages := []string{
@@ -57,12 +57,12 @@ func (c *SetStyleCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Messag
 	keyboard := tgbotapi.NewReplyKeyboard(buttons...)
 	msg.ReplyMarkup = keyboard
 
-	_, err = api.Send(msg)
+	sentMsg, err := api.Send(msg)
 	if err != nil {
-		return log.Wrap(err)
+		return 0, log.Wrap(err)
 	}
 
-	return nil
+	return sentMsg.Chat.ID, nil
 }
 
 func (c *SetStyleCommand) IsTransfer() bool {

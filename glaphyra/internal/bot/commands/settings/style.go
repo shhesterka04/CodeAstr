@@ -7,7 +7,7 @@ import (
 
 type StyleCommand struct{}
 
-func (c *StyleCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
+func (c *StyleCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
 	styleMessages := []string{
 		"Выберите стиль общения",
 	}
@@ -32,10 +32,10 @@ func (c *StyleCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) 
 
 	_, err := api.Send(msg)
 	if err != nil {
-		return log.Wrap(err)
+		return 0, log.Wrap(err)
 	}
 
-	return nil
+	return 0, nil
 }
 
 func (c *StyleCommand) IsTransfer() bool {
