@@ -10,7 +10,7 @@ import (
 
 type SettingsCommand struct{}
 
-func (c *SettingsCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
+func (c *SettingsCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
 	settingsMessages := []string{
 		"Здесь ты можешь настроить свой опыт общения со мной. 🤖 Я запомню твои предпочтения и буду отправлять тебе прогнозы в нужное время.",
 		"Твой звездный опыт начинается здесь! 🔧 Настрой меня под себя: введи свою дату рождения и выбери, как я буду отправлять тебе прогнозы.",
@@ -42,10 +42,10 @@ func (c *SettingsCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Messag
 
 	_, err := api.Send(msg)
 	if err != nil {
-		return log.Wrap(err)
+		return 0, log.Wrap(err)
 	}
 
-	return nil
+	return 0, nil
 }
 
 func (c *SettingsCommand) IsTransfer() bool {

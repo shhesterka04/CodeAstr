@@ -10,7 +10,7 @@ import (
 
 type AboutCommand struct{}
 
-func (c *AboutCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
+func (c *AboutCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
 	aboutMessages := []string{
 		"Я создан, чтобы помогать тебе находить ответы среди звёзд и планет. 🌌 Узнай больше обо мне и о том, как я могу быть полезен.",
 		"Я твой проводник по звёздам и планетам! 🌠 Узнай обо мне больше и посмотри, как я могу помочь тебе.",
@@ -41,10 +41,10 @@ func (c *AboutCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) 
 
 	_, err := api.Send(msg)
 	if err != nil {
-		return log.Wrap(err)
+		return 0, log.Wrap(err)
 	}
 
-	return nil
+	return 0, nil
 }
 
 func (c *AboutCommand) IsTransfer() bool {

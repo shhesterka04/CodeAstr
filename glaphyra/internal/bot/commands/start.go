@@ -20,7 +20,7 @@ func NewStartCommand(userSrv userservice.UserService) *StartCommand {
 	return &StartCommand{userSrv: userSrv}
 }
 
-func (c *StartCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
+func (c *StartCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
 	ctx := context.Background()
 	_, err := c.userSrv.FindByID(ctx, message.From.ID)
 	isNewUser := false
@@ -36,20 +36,20 @@ func (c *StartCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) 
 			},
 		)
 		if err != nil {
-			return log.Wrap(err)
+			return 0, log.Wrap(err)
 		}
 	case err != nil:
-		return log.Wrap(err)
+		return 0, log.Wrap(err)
 	}
 
 	msg := c.getReplyMsg(message, isNewUser)
 
 	_, err = api.Send(msg)
 	if err != nil {
-		return log.Wrap(err)
+		return 0, log.Wrap(err)
 	}
 
-	return nil
+	return 0, nil
 }
 
 func (c *StartCommand) getReplyMsg(message *tgbotapi.Message, isNewUser bool) tgbotapi.MessageConfig {

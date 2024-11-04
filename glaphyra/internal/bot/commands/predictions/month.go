@@ -10,7 +10,7 @@ import (
 
 type MonthHoroscopeCommand struct{}
 
-func (c *MonthHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
+func (c *MonthHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
 	monthMessages := []string{
 		"Месяц — это длинное путешествие. 🚀 Готов увидеть, как будут развиваться события? Звезды уже знают!",
 		"Готов к большому астрологическому прогнозу? 🌓 Узнаем, как пройдёт этот месяц по звёздам!",
@@ -23,9 +23,9 @@ func (c *MonthHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, monthMessage)
 	msg.ReplyMarkup = inlineKeyboard
-	_, err := api.Send(msg) // todo нормально хэндлить ошибку
+	sentMsg, err := api.Send(msg) // todo нормально хэндлить ошибку
 	if err != nil {
-		return log.Wrap(err)
+		return 0, log.Wrap(err)
 	}
 
 	backButtonMsg := tgbotapi.NewMessage(message.Chat.ID, "Нажмите 'Назад' для возврата")
@@ -34,12 +34,12 @@ func (c *MonthHoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.
 			tgbotapi.NewKeyboardButton("Назад"),
 		),
 	)
-	_, err = api.Send(backButtonMsg)
+	sentMsg, err = api.Send(backButtonMsg)
 	if err != nil {
-		return log.Wrap(err)
+		return 0, log.Wrap(err)
 	}
 
-	return nil
+	return sentMsg.Chat.ID, nil
 }
 
 func (c *MonthHoroscopeCommand) IsTransfer() bool {

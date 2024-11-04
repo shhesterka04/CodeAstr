@@ -10,7 +10,7 @@ import (
 
 type WhoAmICommand struct{}
 
-func (c *WhoAmICommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) error {
+func (c *WhoAmICommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
 	whoAmIMessages := []string{
 		"Я — твой звездный спутник, который расскажет тебе о влиянии планет и их положении на твою жизнь. 🌟 Моя задача — помочь тебе лучше понять себя и окружающих через астрологию.",
 		"Я — звёздный бот, который знает всё о гороскопах и астрологических прогнозах. 🌟 Хочешь узнать, как я могу помочь тебе?",
@@ -22,12 +22,12 @@ func (c *WhoAmICommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message)
 	whoAmIMessage := whoAmIMessages[rand.Intn(len(whoAmIMessages))]
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, whoAmIMessage)
-	_, err := api.Send(msg)
+	sentMsg, err := api.Send(msg)
 	if err != nil {
-		return log.Wrap(err)
+		return 0, log.Wrap(err)
 	}
 
-	return nil
+	return sentMsg.Chat.ID, nil
 }
 
 func (c *WhoAmICommand) IsTransfer() bool {
