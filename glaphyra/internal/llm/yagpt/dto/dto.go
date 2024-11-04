@@ -2,11 +2,11 @@ package dto
 
 // RequestDTO запрос к YaGPT API
 type RequestDTO struct {
-	Model         string  `json:"model"`
-	Temperature   float32 `json:"temperature"`
-	MaxTokens     int32   `json:"max_tokens"`
-	SystemMessage string  `json:"system_message"`
-	UserMessage   string  `json:"user_message"`
+	//Model         string  `json:"model"`
+	//Temperature   float32 `json:"temperature"`
+	//MaxTokens     int32   `json:"max_tokens"`
+	//SystemMessage string  `json:"system_message"`
+	UserMessage string `json:"user_message"`
 }
 
 // ResponseDTO ответ от YaGPT API

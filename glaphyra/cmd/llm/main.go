@@ -24,11 +24,11 @@ func main() {
 	orchestrator.AddHandler("YaGPT", handlers.NewYaGPTHandler(config))
 
 	yaRequest := dto.RequestDTO{
-		Model:         "gpt://b1g788lsg3ebu9vohhji/yandexgpt-lite", // хардкод, но вроде нормально
-		Temperature:   0.6,
-		MaxTokens:     2000,
-		SystemMessage: "Ты умный ассистент",
-		UserMessage:   "Какими науками занимался Альберт Эйнштейн?",
+		//Model:         "gpt://b1g788lsg3ebu9vohhji/yandexgpt-lite", // хардкод, но вроде нормально
+		//Temperature:   0.6,
+		//MaxTokens:     2000,
+		//SystemMessage: "Ты умный ассистент",
+		UserMessage: "Какими науками занимался Альберт Эйнштейн?",
 	}
 
 	yaResponse, err := orchestrator.CallAPI("YaGPT", yaRequest)

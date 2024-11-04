@@ -60,13 +60,13 @@ func (c *YaGPTClient) CallAPI(reqDTO dto.RequestDTO) (dto.ResponseDTO, error) {
 
 func (c *YaGPTClient) buildRequestBody(reqDTO dto.RequestDTO) ([]byte, error) {
 	requestBody := map[string]interface{}{
-		"modelUri": reqDTO.Model,
+		"modelUri": c.config.YagptModel,
 		"completionOptions": map[string]interface{}{
-			"temperature": reqDTO.Temperature,
-			"maxTokens":   reqDTO.MaxTokens,
+			"temperature": c.config.YagptTemperature,
+			"maxTokens":   c.config.YagptMaxTokens,
 		},
 		"messages": []map[string]string{
-			{"role": "system", "text": reqDTO.SystemMessage},
+			{"role": "system", "text": c.config.YagptSystemMessage},
 			{"role": "user", "text": reqDTO.UserMessage},
 		},
 	}
