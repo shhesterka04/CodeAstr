@@ -2,11 +2,13 @@ package user_cmd_handler
 
 import (
 	"fmt"
+	"glaphyra/internal/bot/commands/about"
 	"sync"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"glaphyra/internal/bot"
 	"glaphyra/internal/bot/commands/predictions"
+	"glaphyra/internal/bot/commands/settings"
 	"glaphyra/internal/pkg/log"
 )
 
@@ -29,7 +31,7 @@ func NewUserCmdHandler(api *tgbotapi.BotAPI) UserCommandHandler {
 
 func (i *implUserCmdHandler) HandleUserCommand(userID int64, cmd bot.Command, message *tgbotapi.Message) error {
 	if cmd == nil {
-		i.handleUnknownCommand(i.api, message)
+		i.handleUnknownCommand(userID, i.api, message)
 		return nil
 	}
 
@@ -74,8 +76,33 @@ func (i *implUserCmdHandler) HandleUserCallback(msgID int64, callback *tgbotapi.
 	return nil
 }
 
-func (i *implUserCmdHandler) handleUnknownCommand(api *tgbotapi.BotAPI, message *tgbotapi.Message) {
-	msg := tgbotapi.NewMessage(message.Chat.ID, "Я не понимаю (кто понял тот понял)")
+func (i *implUserCmdHandler) handleUnknownCommand(userID int64, api *tgbotapi.BotAPI, message *tgbotapi.Message) {
+	responseMsg := "Я не понимаю (кто понял тот понял)"
+	history, _ := i.userCommandHistories.LoadOrStore(userID, &CommandHistory{})
+	cmd := history.(*CommandHistory).GetPrevious()
+	switch cmd.(type) {
+	case *settings.Birth:
+		_, err := cmd.(*settings.Birth).SetBirth(api, message)
+		if err != nil {
+			responseMsg = "Что-то пошло не так, попробуйте снова"
+			break
+		}
+		back := &BackCommand{commandHistory: history.(*CommandHistory)}
+		_, err = back.Execute(api, message)
+		return
+	case *about.FeedbackCommand:
+		sent, err := cmd.(*about.FeedbackCommand).SaveOrSendFeedback(api, message)
+		if err != nil {
+			responseMsg = "Что-то пошло не так, попробуйте снова"
+			break
+		}
+		if sent {
+			back := &BackCommand{commandHistory: history.(*CommandHistory)}
+			_, err = back.Execute(api, message)
+		}
+		return
+	}
+	msg := tgbotapi.NewMessage(message.Chat.ID, responseMsg)
 	api.Send(msg)
 }
 

@@ -13,6 +13,7 @@ type UserService interface {
 	Create(ctx context.Context, req *dto.CreateUserRequest) error
 	Update(ctx context.Context, req *dto.UpdateUserRequest) error
 	Delete(ctx context.Context, tgID int64) error
+	SaveFeedback(ctx context.Context, tgID int64, feedback string) error
 }
 
 type implementSrv struct {
@@ -54,6 +55,15 @@ func (i *implementSrv) Update(ctx context.Context, req *dto.UpdateUserRequest) e
 
 func (i *implementSrv) Delete(ctx context.Context, tgID int64) error {
 	err := i.repo.DeleteByID(ctx, tgID)
+	if err != nil {
+		return log.Wrap(err)
+	}
+
+	return nil
+}
+
+func (i *implementSrv) SaveFeedback(ctx context.Context, tgID int64, feedback string) error {
+	err := i.repo.SaveFeedback(ctx, tgID, feedback)
 	if err != nil {
 		return log.Wrap(err)
 	}

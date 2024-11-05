@@ -23,6 +23,7 @@ type Repository interface {
 	Create(ctx context.Context, req *dto.CreateUserRequest) error
 	DeleteByID(ctx context.Context, TgID int64) error
 	UpdateByTgID(ctx context.Context, req *dto.UpdateUserRequest) error
+	SaveFeedback(ctx context.Context, tgID int64, feedback string) error
 }
 
 type repository struct {
@@ -100,6 +101,27 @@ func (r *repository) Create(ctx context.Context, req *dto.CreateUserRequest) err
 	}
 
 	query, args, err := sq.Insert(tables.Users).PlaceholderFormat(sq.Dollar).SetMap(valuesMap).ToSql()
+	if err != nil {
+		return log.Wrap(err)
+	}
+
+	_, err = r.db.Exec(ctx, query, args...)
+
+	if err != nil {
+		return log.Wrap(err)
+	}
+
+	return nil
+}
+
+func (r *repository) SaveFeedback(ctx context.Context, tgID int64, feedback string) error {
+	valuesMap := map[string]interface{}{
+		"tg_id":      tgID,
+		"feedback":   feedback,
+		"created_at": time.Now(),
+	}
+
+	query, args, err := sq.Insert(tables.Feedback).PlaceholderFormat(sq.Dollar).SetMap(valuesMap).ToSql()
 	if err != nil {
 		return log.Wrap(err)
 	}
