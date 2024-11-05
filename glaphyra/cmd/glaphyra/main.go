@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	yaml_config "glaphyra/config"
+	"glaphyra/internal/llm/handlers"
 	"log"
 
 	"glaphyra/internal/app/users/repository"
@@ -11,6 +13,11 @@ import (
 )
 
 func main() {
+	config, err := yaml_config.LoadConfig("config/config.yaml")
+	if err != nil {
+		log.Fatalf("Failed to load config: %v", err)
+	}
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -22,8 +29,9 @@ func main() {
 
 	repo := repository.NewRepository(database)
 	userService := service.NewUserService(repo)
+	yaGptApi := handlers.NewYaGPTHandler(config)
 
-	b, err := bot.NewBot("8096088977:AAEQJYPk2ihyfZ2badyeCfop_6oW8G78tRU", userService)
+	b, err := bot.NewBot("8096088977:AAEQJYPk2ihyfZ2badyeCfop_6oW8G78tRU", userService, yaGptApi)
 	if err != nil {
 		log.Fatalf("Error creating bot: %v", err)
 	}

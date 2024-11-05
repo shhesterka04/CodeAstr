@@ -7,7 +7,11 @@ import (
 )
 
 type Config struct {
-	YagptKey string `yaml:"yagpt-key"`
+	YagptKey           string  `yaml:"yagpt-key"`
+	YagptModel         string  `yaml:"yagpt-model"`
+	YagptTemperature   float32 `yaml:"yagpt-temperature"`
+	YagptMaxTokens     int32   `yaml:"yagpt-max-tokens"`
+	YagptSystemMessage string  `yaml:"yagpt-system-message"`
 }
 
 func LoadConfig(path string) (*Config, error) {

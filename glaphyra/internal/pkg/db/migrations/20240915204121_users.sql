@@ -3,7 +3,7 @@ CREATE TABLE users (
     tg_id INT PRIMARY KEY,
     username TEXT,
     type VARCHAR(10) CHECK (type IN ('user', 'moderator')),
-    style TEXT,
+    style TEXT DEFAULT 'Дружелюбный стиль',
     gender TEXT,
     registration_date DATE,
     birth_date DATE,

@@ -6,6 +6,7 @@ import (
 	"glaphyra/internal/bot"
 	"glaphyra/internal/bot/update_handler"
 	"glaphyra/internal/bot/user_cmd_handler"
+	"glaphyra/internal/llm/handlers"
 )
 
 type Bot struct {
@@ -13,13 +14,13 @@ type Bot struct {
 	handler bot.UpdateHandler
 }
 
-func NewBot(tgToken string, userSrv userservice.UserService) (*Bot, error) {
+func NewBot(tgToken string, userSrv userservice.UserService, gptApi handlers.Handler) (*Bot, error) {
 	api, err := tgbotapi.NewBotAPI(tgToken)
 	if err != nil {
 		return nil, err
 	}
 	userCmdHandler := user_cmd_handler.NewUserCmdHandler(api)
-	updateHandler := update_handler.NewUpdateHandler(userCmdHandler, userSrv)
+	updateHandler := update_handler.NewUpdateHandler(userCmdHandler, userSrv, gptApi)
 
 	return &Bot{api: api, handler: updateHandler}, nil
 }

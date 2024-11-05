@@ -2,6 +2,7 @@ package update_handler
 
 import (
 	"glaphyra/internal/bot/commands/settings"
+	"glaphyra/internal/llm/handlers"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -20,12 +21,12 @@ type implUpdateHandler struct {
 	cmdHandler user_cmd_handler.UserCommandHandler
 }
 
-func NewUpdateHandler(cmdHandler user_cmd_handler.UserCommandHandler, userSrv userservice.UserService) bot.UpdateHandler {
+func NewUpdateHandler(cmdHandler user_cmd_handler.UserCommandHandler, userSrv userservice.UserService, gptApi handlers.Handler) bot.UpdateHandler {
 	i := &implUpdateHandler{
 		cmdHandler: cmdHandler,
 		registry:   NewCommandRegistry(),
 	}
-	i.registerCommands(userSrv)
+	i.registerCommands(userSrv, gptApi)
 
 	return i
 }
@@ -56,7 +57,7 @@ func (i *implUpdateHandler) HandleUpdate(update tgbotapi.Update) {
 	return
 }
 
-func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService) {
+func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService, gptApi handlers.Handler) {
 	i.registry.Register("/start", cmd.NewStartCommand(userSrv))
 	i.registry.Register(backCommand, &user_cmd_handler.BackCommand{})
 
@@ -71,9 +72,9 @@ func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService) {
 	i.registry.Register("Обратная связь", about.NewFeedbackCommand(userSrv))
 
 	// Предсказания
-	i.registry.Register("Гороскоп на день", &predictions.DayHoroscopeCommand{})
-	i.registry.Register("Гороскоп на неделю", &predictions.WeekHoroscopeCommand{})
-	i.registry.Register("Гороскоп на месяц", &predictions.MonthHoroscopeCommand{})
+	i.registry.Register("Гороскоп на день", predictions.NewDayHoroscopeCommand(userSrv, gptApi))
+	i.registry.Register("Гороскоп на неделю", predictions.NewWeekHoroscopeCommand(userSrv, gptApi))
+	i.registry.Register("Гороскоп на месяц", predictions.NewMonthHoroscopeCommand(userSrv, gptApi))
 
 	// Регистрация и настройки
 	i.registry.Register("Выбор стиля общения", &settings.StyleCommand{})
