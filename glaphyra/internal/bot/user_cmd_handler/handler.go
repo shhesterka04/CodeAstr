@@ -67,15 +67,9 @@ func (i *implUserCmdHandler) HandleUserCallback(msgID int64, callback *tgbotapi.
 	}
 
 	switch cmd.(type) {
-	case *predictions.DayHoroscopeCommand:
-		cmd.(*predictions.DayHoroscopeCommand).SendPromt(i.api, callback)
-		fmt.Println(fmt.Sprintf("it was DayHoroscopeCommand from %v", callback.From.ID))
-	case *predictions.WeekHoroscopeCommand:
-		cmd.(*predictions.WeekHoroscopeCommand).SendPromt(i.api, callback)
-		fmt.Println(fmt.Sprintf("it was WeekHoroscopeCommand from %v", callback.From.ID))
-	case *predictions.MonthHoroscopeCommand:
-		cmd.(*predictions.MonthHoroscopeCommand).SendPromt(i.api, callback)
-		fmt.Println(fmt.Sprintf("it was MonthHoroscopeCommand from %v", callback.From.ID))
+	case *predictions.HoroscopeCommand:
+		cmd.(*predictions.HoroscopeCommand).SendPrompt(i.api, callback)
+		fmt.Println(fmt.Sprintf("it was HoroscopeCommand from %v", callback.From.ID))
 	default:
 		fmt.Println("it was unknown command")
 	}

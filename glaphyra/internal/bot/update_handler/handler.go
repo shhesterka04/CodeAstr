@@ -72,9 +72,9 @@ func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService, gp
 	i.registry.Register("Обратная связь", about.NewFeedbackCommand(userSrv))
 
 	// Предсказания
-	i.registry.Register("Гороскоп на день", predictions.NewDayHoroscopeCommand(userSrv, gptApi))
-	i.registry.Register("Гороскоп на неделю", predictions.NewWeekHoroscopeCommand(userSrv, gptApi))
-	i.registry.Register("Гороскоп на месяц", predictions.NewMonthHoroscopeCommand(userSrv, gptApi))
+	i.registry.Register("Гороскоп на день", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Daily))
+	i.registry.Register("Гороскоп на неделю", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Weekly))
+	i.registry.Register("Гороскоп на месяц", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Monthly))
 
 	// Регистрация и настройки
 	i.registry.Register("Выбор стиля общения", &settings.StyleCommand{})
