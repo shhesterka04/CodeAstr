@@ -18,7 +18,7 @@ var (
 		tgbotapi.NewInlineKeyboardButtonData("♓ Рыбы", "Pisces"),
 	}
 
-	inlineKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+	InlineKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(inlineButtons[0], inlineButtons[1], inlineButtons[2]),
 		tgbotapi.NewInlineKeyboardRow(inlineButtons[3], inlineButtons[4], inlineButtons[5]),
 		tgbotapi.NewInlineKeyboardRow(inlineButtons[6], inlineButtons[7], inlineButtons[8]),

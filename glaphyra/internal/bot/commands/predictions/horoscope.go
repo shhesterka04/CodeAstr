@@ -34,7 +34,7 @@ func (c *HoroscopeCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Messa
 	msgVars := messagesMap[c.horoscopeType][randomIndex]
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, msgVars)
-	msg.ReplyMarkup = inlineKeyboard
+	msg.ReplyMarkup = InlineKeyboard
 	sentMsg, err := api.Send(msg)
 	if err != nil {
 		return 0, log.Wrap(err)
