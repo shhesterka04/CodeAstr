@@ -4,7 +4,7 @@ yagpt-temperature: 0.6
 yagpt-max-tokens: 2000
 yagpt-system-message: "Представь, что ты мудрая гадалка"
 
-db-dsn: "postgres://test:test@localhost:5432/test?sslmode=disable"
+db-dsn: "postgres://test:test@database:5432/test?sslmode=disable"
 
 tg-token: "8096088977:AAEQJYPk2ihyfZ2badyeCfop_6oW8G78tRU"
 

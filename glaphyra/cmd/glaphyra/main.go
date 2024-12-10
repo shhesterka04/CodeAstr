@@ -37,5 +37,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating bot: %v", err)
 	}
+	log.Println("Bot started")
 	b.Start()
 }

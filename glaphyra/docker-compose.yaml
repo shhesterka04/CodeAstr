@@ -3,6 +3,16 @@ networks:
     driver: bridge
 
 services:
+  service:
+    image: glaphyra
+    depends_on:
+      database:
+        condition: service_healthy
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./config.yaml:/app/config.yaml
+      - ./internal/pkg/db/migrations:/app/migrations/
   database:
     image: postgres:13
     restart: always
