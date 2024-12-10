@@ -1,6 +1,7 @@
 package update_handler
 
 import (
+	"glaphyra/internal/bot/commands/compatibility"
 	"glaphyra/internal/bot/commands/settings"
 	"glaphyra/internal/llm/handlers"
 	"log"
@@ -75,6 +76,9 @@ func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService, gp
 	i.registry.Register("Гороскоп на день", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Daily))
 	i.registry.Register("Гороскоп на неделю", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Weekly))
 	i.registry.Register("Гороскоп на месяц", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Monthly))
+
+	// Совместимость
+	i.registry.Register("Совместимость по знакам зодиака", compatibility.NewZodiakCompCommand(userSrv, gptApi))
 
 	// Регистрация и настройки
 	i.registry.Register("Выбор стиля общения", &settings.StyleCommand{})

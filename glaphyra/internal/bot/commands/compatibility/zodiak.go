@@ -1,13 +1,11 @@
 package compatibility
 
 import (
-	"context"
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/bot/commands/predictions"
 	"glaphyra/internal/llm/handlers"
-	"glaphyra/internal/llm/yagpt/dto"
 	"glaphyra/internal/pkg/log"
 	"math/rand"
 	"sync"
@@ -15,14 +13,16 @@ import (
 )
 
 type ZodiakCompCommand struct {
-	gptApi  handlers.Handler
-	userSrv userservice.UserService
+	gptApi      handlers.Handler
+	userSrv     userservice.UserService
+	firstZodiak sync.Map
 }
 
 func NewZodiakCompCommand(userSrv userservice.UserService, gptApi handlers.Handler) *ZodiakCompCommand {
 	return &ZodiakCompCommand{
-		userSrv: userSrv,
-		gptApi:  gptApi,
+		userSrv:     userSrv,
+		gptApi:      gptApi,
+		firstZodiak: sync.Map{},
 	}
 }
 
@@ -33,10 +33,15 @@ var zodiakMag = []string{
 	"Звезды подскажут, насколько гармоничны ваши отношения. 🌙 Введи свои и партнёрские знаки, чтобы узнать больше!",
 }
 
+func (c *ZodiakCompCommand) IsFirstFull(userID int64) bool {
+	_, ok := c.firstZodiak.Load(userID)
+	return ok
+}
+
 func (c *ZodiakCompCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
 	rand.Seed(time.Now().UnixNano())
 	randomIndex := rand.Intn(len(zodiakMag))
-	msgVar := natalMag[randomIndex]
+	msgVar := zodiakMag[randomIndex]
 	msg := tgbotapi.NewMessage(message.Chat.ID, msgVar)
 	if _, err := api.Send(msg); err != nil {
 		return 0, log.Wrap(err)
@@ -63,43 +68,70 @@ func (c *ZodiakCompCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Mess
 	return int64(sentMsg.MessageID), nil
 }
 
-func (c *ZodiakCompCommand) SendPrompt(api *tgbotapi.BotAPI, callback *tgbotapi.CallbackQuery) error {
-	wg := sync.WaitGroup{}
-	usr, err := c.userSrv.FindByID(context.Background(), callback.From.ID)
+func (c *ZodiakCompCommand) GetFirstSignSendSecond(api *tgbotapi.BotAPI, callback *tgbotapi.CallbackQuery) (int64, error) {
+	c.firstZodiak.Store(callback.From.ID, callback.Data)
+
+	msg := tgbotapi.NewMessage(callback.Message.Chat.ID, "Выберите знак зодиака партнера:")
+	msg.ReplyMarkup = predictions.InlineKeyboard
+	sentMsg, err := api.Send(msg)
 	if err != nil {
-		return log.Wrap(err)
+		return 0, log.Wrap(err)
 	}
 
-	wg.Add(1)
+	backButtonMsg := tgbotapi.NewMessage(callback.Message.Chat.ID, predictions.BackTip)
+	backButtonMsg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
+		tgbotapi.NewKeyboardButtonRow(
+			tgbotapi.NewKeyboardButton(predictions.BackCmd),
+		),
+	)
 
-	go func() {
-		defer wg.Done()
-		typingMsg := tgbotapi.NewChatAction(callback.Message.Chat.ID, tgbotapi.ChatTyping)
-		api.Send(typingMsg)
-	}()
-
-	yaResponse, err := c.gptApi.CallAPI(dto.RequestDTO{
-		UserMessage: fmt.Sprintf(
-			predictionPrompt,
-			c.horoscopeType,
-			callback.Data,
-			usr.Style),
-	})
-
-	wg.Wait()
-
-	if err != nil {
-		return log.Wrap(err)
+	if _, err = api.Send(backButtonMsg); err != nil {
+		return 0, log.Wrap(err)
 	}
-	response, ok := yaResponse.(dto.ResponseDTO)
-	if !ok {
-		return log.Wrap(err)
-	}
-	msg := tgbotapi.NewMessage(callback.Message.Chat.ID, response.Result)
-	msg.ParseMode = "Markdown"
-	if _, err = api.Send(msg); err != nil {
-		return log.Wrap(err)
-	}
+
+	return int64(sentMsg.MessageID), nil
+}
+
+func (c *ZodiakCompCommand) GetSecondSignSendResult(api *tgbotapi.BotAPI, callback *tgbotapi.CallbackQuery) error {
+	//wg := sync.WaitGroup{}
+	//usr, err := c.userSrv.FindByID(context.Background(), callback.From.ID)
+	//if err != nil {
+	//	return log.Wrap(err)
+	//}
+
+	firstSign, _ := c.firstZodiak.Load(callback.From.ID)
+	fmt.Println(callback.Data, " ", firstSign)
+	c.firstZodiak.Delete(callback.From.ID)
+	//wg.Add(1)
+	//
+	//go func() {
+	//	defer wg.Done()
+	//	typingMsg := tgbotapi.NewChatAction(callback.Message.Chat.ID, tgbotapi.ChatTyping)
+	//	api.Send(typingMsg)
+	//}()
+	//
+	//yaResponse, err := c.gptApi.CallAPI(dto.RequestDTO{
+	//	UserMessage: fmt.Sprintf(
+	//		predictionPrompt,
+	//		c.horoscopeType,
+	//		callback.Data,
+	//		usr.Style),
+	//})
+	//
+	//wg.Wait()
+	//
+	//if err != nil {
+	//	return log.Wrap(err)
+	//}
+	//response, ok := yaResponse.(dto.ResponseDTO)
+	//if !ok {
+	//	return log.Wrap(err)
+	//}
+	//msg := tgbotapi.NewMessage(callback.Message.Chat.ID, response.Result)
+	//msg.ParseMode = "Markdown"
+	//if _, err = api.Send(msg); err != nil {
+	//	return log.Wrap(err)
+	//}
 
 	return nil
 }

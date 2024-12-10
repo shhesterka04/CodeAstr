@@ -3,6 +3,7 @@ package user_cmd_handler
 import (
 	"fmt"
 	"glaphyra/internal/bot/commands/about"
+	"glaphyra/internal/bot/commands/compatibility"
 	"sync"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -61,15 +62,28 @@ func (i *implUserCmdHandler) HandleUserCallback(msgID int64, callback *tgbotapi.
 		return nil
 	}
 
+	fmt.Println("Мы тута")
+
 	cmd, ok := i.messageIDToCommandID.Load(msgID)
 	if !ok {
 		return nil
 	}
 
+	fmt.Println("И Мы тута", cmd.(*compatibility.ZodiakCompCommand).IsFirstFull(callback.From.ID))
+
 	switch cmd.(type) {
 	case *predictions.HoroscopeCommand:
 		cmd.(*predictions.HoroscopeCommand).SendPrompt(i.api, callback)
 		fmt.Println(fmt.Sprintf("it was HoroscopeCommand from %v", callback.From.ID))
+	case *compatibility.ZodiakCompCommand:
+		if !cmd.(*compatibility.ZodiakCompCommand).IsFirstFull(callback.From.ID) {
+			cmd.(*compatibility.ZodiakCompCommand).GetFirstSignSendSecond(i.api, callback)
+			fmt.Println("первых нах")
+		} else {
+			cmd.(*compatibility.ZodiakCompCommand).GetSecondSignSendResult(i.api, callback)
+			fmt.Println("вторых нах")
+		}
+
 	default:
 		fmt.Println("it was unknown command")
 	}
