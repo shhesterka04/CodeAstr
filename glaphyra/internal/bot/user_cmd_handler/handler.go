@@ -77,7 +77,8 @@ func (i *implUserCmdHandler) HandleUserCallback(msgID int64, callback *tgbotapi.
 		fmt.Println(fmt.Sprintf("it was HoroscopeCommand from %v", callback.From.ID))
 	case *compatibility.ZodiakCompCommand:
 		if !cmd.(*compatibility.ZodiakCompCommand).IsFirstFull(callback.From.ID) {
-			cmd.(*compatibility.ZodiakCompCommand).GetFirstSignSendSecond(i.api, callback)
+			msgSecondID, _ := cmd.(*compatibility.ZodiakCompCommand).GetFirstSignSendSecond(i.api, callback)
+			i.messageIDToCommandID.LoadOrStore(msgSecondID, cmd)
 			fmt.Println("первых нах")
 		} else {
 			cmd.(*compatibility.ZodiakCompCommand).GetSecondSignSendResult(i.api, callback)
