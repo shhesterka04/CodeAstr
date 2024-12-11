@@ -1,7 +1,9 @@
 package compatibility
 
 import (
+	"context"
 	"fmt"
+	"glaphyra/internal/llm/yagpt/dto"
 	"math/rand"
 	"sync"
 	"time"
@@ -27,12 +29,28 @@ func NewZodiakCompCommand(userSrv userservice.UserService, gptApi handlers.Handl
 	}
 }
 
-var zodiakMag = []string{
-	"Введи свой знак зодиака и знак партнера, чтобы узнать, как звезды видят ваши отношения.",
-	"Звезды могут помочь понять твои отношения. 💘 Введи свой знак зодиака и знак другого человека, и я покажу, как вы совместимы.",
-	"Любопытно, как планеты влияют на ваши отношения? 💑 Введи два знака, и мы посмотрим на вашу астрологическую совместимость!",
-	"Звезды подскажут, насколько гармоничны ваши отношения. 🌙 Введи свои и партнёрские знаки, чтобы узнать больше!",
-}
+var (
+	zodiakMag = []string{
+		"Введи свой знак зодиака и знак партнера, чтобы узнать, как звезды видят ваши отношения.",
+		"Звезды могут помочь понять твои отношения. 💘 Введи свой знак зодиака и знак другого человека, и я покажу, как вы совместимы.",
+		"Любопытно, как планеты влияют на ваши отношения? 💑 Введи два знака, и мы посмотрим на вашу астрологическую совместимость!",
+		"Звезды подскажут, насколько гармоничны ваши отношения. 🌙 Введи свои и партнёрские знаки, чтобы узнать больше!",
+	}
+
+	compatibilityPromt = "Привет, бот! Мне нужена совместимость двух знаков зодиака: " +
+		"- Первый знак зодиака: %s " +
+		"- Второй знак зодиака: %s " +
+		"Требования: " +
+		"1. Прогноз должен быть детализированным и точным." +
+		"2. Учти особенности целевой аудитории: студенты, офисные сотрудники, домохозяйки." +
+		"3. Предсказания должны быть позитивными и мотивирующими, но также реалистичными." +
+		"4. Используй стиль общения: %s." +
+		"5. Не надо здороваться и прощаться. " +
+		"6. Примерно 50 слов " +
+		"7. Пиши не по пунктам, а сплошным текстом " +
+		"8. Используй эмодзи и смайлики для улучшения текста. " +
+		"Благодарю за помощь! "
+)
 
 func (c *ZodiakCompCommand) IsFirstFull(userID int64) bool {
 	_, ok := c.firstZodiak.Load(userID)
@@ -94,45 +112,44 @@ func (c *ZodiakCompCommand) GetFirstSignSendSecond(api *tgbotapi.BotAPI, callbac
 }
 
 func (c *ZodiakCompCommand) GetSecondSignSendResult(api *tgbotapi.BotAPI, callback *tgbotapi.CallbackQuery) error {
-	//wg := sync.WaitGroup{}
-	//usr, err := c.userSrv.FindByID(context.Background(), callback.From.ID)
-	//if err != nil {
-	//	return log.Wrap(err)
-	//}
+	wg := sync.WaitGroup{}
+	usr, err := c.userSrv.FindByID(context.Background(), callback.From.ID)
+	if err != nil {
+		return log.Wrap(err)
+	}
 
 	firstSign, _ := c.firstZodiak.Load(callback.From.ID)
-	fmt.Println(callback.Data, " ", firstSign)
 	c.firstZodiak.Delete(callback.From.ID)
-	//wg.Add(1)
-	//
-	//go func() {
-	//	defer wg.Done()
-	//	typingMsg := tgbotapi.NewChatAction(callback.Message.Chat.ID, tgbotapi.ChatTyping)
-	//	api.Send(typingMsg)
-	//}()
-	//
-	//yaResponse, err := c.gptApi.CallAPI(dto.RequestDTO{
-	//	UserMessage: fmt.Sprintf(
-	//		predictionPrompt,
-	//		c.horoscopeType,
-	//		callback.Data,
-	//		usr.Style),
-	//})
-	//
-	//wg.Wait()
-	//
-	//if err != nil {
-	//	return log.Wrap(err)
-	//}
-	//response, ok := yaResponse.(dto.ResponseDTO)
-	//if !ok {
-	//	return log.Wrap(err)
-	//}
-	//msg := tgbotapi.NewMessage(callback.Message.Chat.ID, response.Result)
-	//msg.ParseMode = "Markdown"
-	//if _, err = api.Send(msg); err != nil {
-	//	return log.Wrap(err)
-	//}
+	wg.Add(1)
+
+	go func() {
+		defer wg.Done()
+		typingMsg := tgbotapi.NewChatAction(callback.Message.Chat.ID, tgbotapi.ChatTyping)
+		api.Send(typingMsg)
+	}()
+
+	yaResponse, err := c.gptApi.CallAPI(dto.RequestDTO{
+		UserMessage: fmt.Sprintf(
+			compatibilityPromt,
+			firstSign,
+			callback.Data,
+			usr.Style),
+	})
+
+	wg.Wait()
+
+	if err != nil {
+		return log.Wrap(err)
+	}
+	response, ok := yaResponse.(dto.ResponseDTO)
+	if !ok {
+		return log.Wrap(err)
+	}
+	msg := tgbotapi.NewMessage(callback.Message.Chat.ID, response.Result)
+	msg.ParseMode = "Markdown"
+	if _, err = api.Send(msg); err != nil {
+		return log.Wrap(err)
+	}
 
 	return nil
 }

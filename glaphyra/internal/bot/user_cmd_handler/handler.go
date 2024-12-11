@@ -62,14 +62,10 @@ func (i *implUserCmdHandler) HandleUserCallback(msgID int64, callback *tgbotapi.
 		return nil
 	}
 
-	fmt.Println("Мы тута")
-
 	cmd, ok := i.messageIDToCommandID.Load(msgID)
 	if !ok {
 		return nil
 	}
-
-	fmt.Println("И Мы тута", cmd.(*compatibility.ZodiakCompCommand).IsFirstFull(callback.From.ID))
 
 	switch cmd.(type) {
 	case *predictions.HoroscopeCommand:
@@ -79,10 +75,8 @@ func (i *implUserCmdHandler) HandleUserCallback(msgID int64, callback *tgbotapi.
 		if !cmd.(*compatibility.ZodiakCompCommand).IsFirstFull(callback.From.ID) {
 			msgSecondID, _ := cmd.(*compatibility.ZodiakCompCommand).GetFirstSignSendSecond(i.api, callback)
 			i.messageIDToCommandID.LoadOrStore(msgSecondID, cmd)
-			fmt.Println("первых нах")
 		} else {
 			cmd.(*compatibility.ZodiakCompCommand).GetSecondSignSendResult(i.api, callback)
-			fmt.Println("вторых нах")
 		}
 
 	default:
