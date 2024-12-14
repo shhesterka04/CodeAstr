@@ -79,6 +79,7 @@ func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService, gp
 
 	// Совместимость
 	i.registry.Register("Совместимость по знакам зодиака", compatibility.NewZodiakCompCommand(userSrv, gptApi))
+	i.registry.Register("Совместимость по натальной карте", compatibility.NewNatalCompCommand(userSrv, gptApi))
 
 	// Регистрация и настройки
 	i.registry.Register("Выбор стиля общения", &settings.StyleCommand{})

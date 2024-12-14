@@ -68,9 +68,9 @@ func (i *implUserCmdHandler) HandleUserCallback(msgID int64, callback *tgbotapi.
 	}
 
 	switch cmd.(type) {
+	case *compatibility.NatalCompCommand:
 	case *predictions.HoroscopeCommand:
 		cmd.(*predictions.HoroscopeCommand).SendPrompt(i.api, callback)
-		fmt.Println(fmt.Sprintf("it was HoroscopeCommand from %v", callback.From.ID))
 	case *compatibility.ZodiakCompCommand:
 		if !cmd.(*compatibility.ZodiakCompCommand).IsFirstFull(callback.From.ID) {
 			msgSecondID, _ := cmd.(*compatibility.ZodiakCompCommand).GetFirstSignSendSecond(i.api, callback)
@@ -91,6 +91,15 @@ func (i *implUserCmdHandler) handleUnknownCommand(userID int64, api *tgbotapi.Bo
 	history, _ := i.userCommandHistories.LoadOrStore(userID, &CommandHistory{})
 	cmd := history.(*CommandHistory).GetPrevious()
 	switch cmd.(type) {
+	case *compatibility.NatalCompCommand:
+		_, err := cmd.(*compatibility.NatalCompCommand).SendResult(api, message)
+		if err != nil {
+			responseMsg = "Что-то пошло не так, попробуйте снова"
+			break
+		}
+		back := &BackCommand{commandHistory: history.(*CommandHistory)}
+		_, err = back.Execute(api, message)
+		return
 	case *settings.Birth:
 		_, err := cmd.(*settings.Birth).SetBirth(api, message)
 		if err != nil {
