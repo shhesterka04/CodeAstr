@@ -1,10 +1,6 @@
 package update_handler
 
 import (
-	"glaphyra/internal/bot/commands/compatibility"
-	"glaphyra/internal/bot/commands/dreambook"
-	"glaphyra/internal/bot/commands/settings"
-	"glaphyra/internal/llm/handlers"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -12,8 +8,12 @@ import (
 	"glaphyra/internal/bot"
 	cmd "glaphyra/internal/bot/commands"
 	"glaphyra/internal/bot/commands/about"
+	"glaphyra/internal/bot/commands/compatibility"
+	"glaphyra/internal/bot/commands/dreambook"
 	"glaphyra/internal/bot/commands/predictions"
+	"glaphyra/internal/bot/commands/settings"
 	"glaphyra/internal/bot/user_cmd_handler"
+	"glaphyra/internal/llm/handlers"
 )
 
 const backCommand = "Назад"

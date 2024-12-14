@@ -3,15 +3,15 @@ package dreambook
 import (
 	"context"
 	"fmt"
-	userservice "glaphyra/internal/app/users/service"
-	"glaphyra/internal/bot/commands/predictions"
-	"glaphyra/internal/llm/handlers"
-	"glaphyra/internal/llm/yagpt/dto"
 	"math/rand"
 	"sync"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	userservice "glaphyra/internal/app/users/service"
+	"glaphyra/internal/bot/commands/predictions"
+	"glaphyra/internal/llm/handlers"
+	"glaphyra/internal/llm/yagpt/dto"
 	"glaphyra/internal/pkg/log"
 )
 

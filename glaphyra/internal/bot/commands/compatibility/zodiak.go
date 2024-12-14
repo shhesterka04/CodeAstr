@@ -3,7 +3,6 @@ package compatibility
 import (
 	"context"
 	"fmt"
-	"glaphyra/internal/llm/yagpt/dto"
 	"math/rand"
 	"sync"
 	"time"
@@ -12,6 +11,7 @@ import (
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/bot/commands/predictions"
 	"glaphyra/internal/llm/handlers"
+	"glaphyra/internal/llm/yagpt/dto"
 	"glaphyra/internal/pkg/log"
 )
 
