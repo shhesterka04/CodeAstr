@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"glaphyra/internal/pkg/log"
 	"math/rand"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"glaphyra/internal/pkg/log"
 )
 
 type PredictionsCommand struct{}
@@ -30,11 +30,6 @@ func (c *PredictionsCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Mes
 		},
 		{
 			tgbotapi.NewKeyboardButton("Гороскоп на месяц"),
-			tgbotapi.NewKeyboardButton("Персонализированные гороскопы"),
-		},
-		{
-			tgbotapi.NewKeyboardButton("Натальная карта"),
-			tgbotapi.NewKeyboardButton("Дни для сделок"),
 		},
 		{
 			tgbotapi.NewKeyboardButton("Назад"),

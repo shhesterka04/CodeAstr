@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"glaphyra/internal/pkg/log"
 	"math/rand"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"glaphyra/internal/pkg/log"
 )
 
 type AboutCommand struct{}
@@ -26,7 +26,6 @@ func (c *AboutCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) 
 	buttons := [][]tgbotapi.KeyboardButton{
 		{
 			tgbotapi.NewKeyboardButton("Кто я?"),
-			tgbotapi.NewKeyboardButton("Мои функции"),
 		},
 		{
 			tgbotapi.NewKeyboardButton("Обратная связь"),

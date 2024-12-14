@@ -1,8 +1,6 @@
 package update_handler
 
 import (
-	"glaphyra/internal/bot/commands/settings"
-	"glaphyra/internal/llm/handlers"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -10,8 +8,12 @@ import (
 	"glaphyra/internal/bot"
 	cmd "glaphyra/internal/bot/commands"
 	"glaphyra/internal/bot/commands/about"
+	"glaphyra/internal/bot/commands/compatibility"
+	"glaphyra/internal/bot/commands/dreambook"
 	"glaphyra/internal/bot/commands/predictions"
+	"glaphyra/internal/bot/commands/settings"
 	"glaphyra/internal/bot/user_cmd_handler"
+	"glaphyra/internal/llm/handlers"
 )
 
 const backCommand = "Назад"
@@ -43,7 +45,7 @@ func (i *implUpdateHandler) HandleUpdate(update tgbotapi.Update) {
 	case update.CallbackQuery != nil:
 		userID = update.CallbackQuery.From.ID
 		messageID := update.CallbackQuery.Message.MessageID
-		err := i.cmdHandler.HandleUserCallback(int64(messageID), update.CallbackQuery)
+		err := i.cmdHandler.HandleUserCallback(int64(messageID), userID, update.CallbackQuery)
 		if err != nil {
 			log.Println(err)
 		}
@@ -62,6 +64,7 @@ func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService, gp
 	i.registry.Register(backCommand, &user_cmd_handler.BackCommand{})
 
 	i.registry.Register("Предсказания", &cmd.PredictionsCommand{})
+	i.registry.Register("Сонник", dreambook.NewDreambookCommand(userSrv, gptApi))
 	i.registry.Register("Совместимость", &cmd.CompatibilityCommand{})
 	i.registry.Register("Регистрация и настройки", &cmd.SettingsCommand{})
 	i.registry.Register("О боте", &cmd.AboutCommand{})
@@ -72,9 +75,13 @@ func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService, gp
 	i.registry.Register("Обратная связь", about.NewFeedbackCommand(userSrv))
 
 	// Предсказания
-	i.registry.Register("Гороскоп на день", predictions.NewDayHoroscopeCommand(userSrv, gptApi))
-	i.registry.Register("Гороскоп на неделю", predictions.NewWeekHoroscopeCommand(userSrv, gptApi))
-	i.registry.Register("Гороскоп на месяц", predictions.NewMonthHoroscopeCommand(userSrv, gptApi))
+	i.registry.Register("Гороскоп на день", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Daily))
+	i.registry.Register("Гороскоп на неделю", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Weekly))
+	i.registry.Register("Гороскоп на месяц", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Monthly))
+
+	// Совместимость
+	i.registry.Register("Совместимость по знакам зодиака", compatibility.NewZodiakCompCommand(userSrv, gptApi))
+	i.registry.Register("Совместимость по натальной карте", compatibility.NewNatalCompCommand(userSrv, gptApi))
 
 	// Регистрация и настройки
 	i.registry.Register("Выбор стиля общения", &settings.StyleCommand{})

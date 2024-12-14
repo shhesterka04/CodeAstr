@@ -2,11 +2,13 @@ package user_cmd_handler
 
 import (
 	"fmt"
-	"glaphyra/internal/bot/commands/about"
 	"sync"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"glaphyra/internal/bot"
+	"glaphyra/internal/bot/commands/about"
+	"glaphyra/internal/bot/commands/compatibility"
+	"glaphyra/internal/bot/commands/dreambook"
 	"glaphyra/internal/bot/commands/predictions"
 	"glaphyra/internal/bot/commands/settings"
 	"glaphyra/internal/pkg/log"
@@ -20,7 +22,7 @@ type implUserCmdHandler struct {
 
 type UserCommandHandler interface {
 	HandleUserCommand(userID int64, cmd bot.Command, message *tgbotapi.Message) error
-	HandleUserCallback(msgID int64, message *tgbotapi.CallbackQuery) error
+	HandleUserCallback(msgID int64, userID int64, message *tgbotapi.CallbackQuery) error
 }
 
 func NewUserCmdHandler(api *tgbotapi.BotAPI) UserCommandHandler {
@@ -56,7 +58,7 @@ func (i *implUserCmdHandler) HandleUserCommand(userID int64, cmd bot.Command, me
 	return nil
 }
 
-func (i *implUserCmdHandler) HandleUserCallback(msgID int64, callback *tgbotapi.CallbackQuery) error {
+func (i *implUserCmdHandler) HandleUserCallback(msgID int64, userID int64, callback *tgbotapi.CallbackQuery) error {
 	if msgID == 0 {
 		return nil
 	}
@@ -66,16 +68,23 @@ func (i *implUserCmdHandler) HandleUserCallback(msgID int64, callback *tgbotapi.
 		return nil
 	}
 
+	history, _ := i.userCommandHistories.LoadOrStore(userID, &CommandHistory{})
 	switch cmd.(type) {
-	case *predictions.DayHoroscopeCommand:
-		cmd.(*predictions.DayHoroscopeCommand).SendPromt(i.api, callback)
-		fmt.Println(fmt.Sprintf("it was DayHoroscopeCommand from %v", callback.From.ID))
-	case *predictions.WeekHoroscopeCommand:
-		cmd.(*predictions.WeekHoroscopeCommand).SendPromt(i.api, callback)
-		fmt.Println(fmt.Sprintf("it was WeekHoroscopeCommand from %v", callback.From.ID))
-	case *predictions.MonthHoroscopeCommand:
-		cmd.(*predictions.MonthHoroscopeCommand).SendPromt(i.api, callback)
-		fmt.Println(fmt.Sprintf("it was MonthHoroscopeCommand from %v", callback.From.ID))
+	case *compatibility.NatalCompCommand:
+	case *predictions.HoroscopeCommand:
+		cmd.(*predictions.HoroscopeCommand).SendPrompt(i.api, callback)
+		back := &BackCommand{commandHistory: history.(*CommandHistory)}
+		back.Execute(i.api, callback.Message)
+	case *compatibility.ZodiakCompCommand:
+		if !cmd.(*compatibility.ZodiakCompCommand).IsFirstFull(callback.From.ID) {
+			msgSecondID, _ := cmd.(*compatibility.ZodiakCompCommand).GetFirstSignSendSecond(i.api, callback)
+			i.messageIDToCommandID.LoadOrStore(msgSecondID, cmd)
+		} else {
+			cmd.(*compatibility.ZodiakCompCommand).GetSecondSignSendResult(i.api, callback)
+			back := &BackCommand{commandHistory: history.(*CommandHistory)}
+			back.Execute(i.api, callback.Message)
+		}
+
 	default:
 		fmt.Println("it was unknown command")
 	}
@@ -88,6 +97,24 @@ func (i *implUserCmdHandler) handleUnknownCommand(userID int64, api *tgbotapi.Bo
 	history, _ := i.userCommandHistories.LoadOrStore(userID, &CommandHistory{})
 	cmd := history.(*CommandHistory).GetPrevious()
 	switch cmd.(type) {
+	case *compatibility.NatalCompCommand:
+		_, err := cmd.(*compatibility.NatalCompCommand).SendResult(api, message)
+		if err != nil {
+			responseMsg = "Что-то пошло не так, попробуйте снова"
+			break
+		}
+		back := &BackCommand{commandHistory: history.(*CommandHistory)}
+		_, err = back.Execute(api, message)
+		return
+	case *dreambook.DreambookCommand:
+		_, err := cmd.(*dreambook.DreambookCommand).SendResult(api, message)
+		if err != nil {
+			responseMsg = "Что-то пошло не так, попробуйте снова"
+			break
+		}
+		back := &BackCommand{commandHistory: history.(*CommandHistory)}
+		_, err = back.Execute(api, message)
+		return
 	case *settings.Birth:
 		_, err := cmd.(*settings.Birth).SetBirth(api, message)
 		if err != nil {

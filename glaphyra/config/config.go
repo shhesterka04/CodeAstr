@@ -12,6 +12,10 @@ type Config struct {
 	YagptTemperature   float32 `yaml:"yagpt-temperature"`
 	YagptMaxTokens     int32   `yaml:"yagpt-max-tokens"`
 	YagptSystemMessage string  `yaml:"yagpt-system-message"`
+
+	TgToken string `yaml:"tg-token"`
+
+	DbDSN string `yaml:"db-dsn"`
 }
 
 func LoadConfig(path string) (*Config, error) {

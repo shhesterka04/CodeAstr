@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"glaphyra/internal/pkg/log"
 	"math/rand"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"glaphyra/internal/pkg/log"
 )
 
 type SettingsCommand struct{}
@@ -25,12 +25,11 @@ func (c *SettingsCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Messag
 
 	buttons := [][]tgbotapi.KeyboardButton{
 		{
-			tgbotapi.NewKeyboardButton("Ввод даты рождения"),
-			tgbotapi.NewKeyboardButton("Настройка времени уведомлений"),
+			tgbotapi.NewKeyboardButton("Управление подписками"),
 		},
 		{
 			tgbotapi.NewKeyboardButton("Выбор стиля общения"),
-			tgbotapi.NewKeyboardButton("Управление подписками"),
+			tgbotapi.NewKeyboardButton("Ввод даты рождения"),
 		},
 		{
 			tgbotapi.NewKeyboardButton("Назад"),
