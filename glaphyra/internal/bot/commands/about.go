@@ -26,7 +26,6 @@ func (c *AboutCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) 
 	buttons := [][]tgbotapi.KeyboardButton{
 		{
 			tgbotapi.NewKeyboardButton("Кто я?"),
-			tgbotapi.NewKeyboardButton("Мои функции"),
 		},
 		{
 			tgbotapi.NewKeyboardButton("Обратная связь"),

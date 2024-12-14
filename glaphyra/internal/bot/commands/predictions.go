@@ -30,11 +30,6 @@ func (c *PredictionsCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Mes
 		},
 		{
 			tgbotapi.NewKeyboardButton("Гороскоп на месяц"),
-			tgbotapi.NewKeyboardButton("Персонализированные гороскопы"),
-		},
-		{
-			tgbotapi.NewKeyboardButton("Натальная карта"),
-			tgbotapi.NewKeyboardButton("Дни для сделок"),
 		},
 		{
 			tgbotapi.NewKeyboardButton("Назад"),
