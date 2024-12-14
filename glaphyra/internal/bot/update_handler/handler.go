@@ -2,6 +2,7 @@ package update_handler
 
 import (
 	"glaphyra/internal/bot/commands/compatibility"
+	"glaphyra/internal/bot/commands/dreambook"
 	"glaphyra/internal/bot/commands/settings"
 	"glaphyra/internal/llm/handlers"
 	"log"
@@ -63,6 +64,7 @@ func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService, gp
 	i.registry.Register(backCommand, &user_cmd_handler.BackCommand{})
 
 	i.registry.Register("Предсказания", &cmd.PredictionsCommand{})
+	i.registry.Register("Сонник", dreambook.NewDreambookCommand(userSrv, gptApi))
 	i.registry.Register("Совместимость", &cmd.CompatibilityCommand{})
 	i.registry.Register("Регистрация и настройки", &cmd.SettingsCommand{})
 	i.registry.Register("О боте", &cmd.AboutCommand{})

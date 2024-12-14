@@ -79,7 +79,7 @@ func (c *StartCommand) getReplyMsg(message *tgbotapi.Message, isNewUser bool) tg
 	buttons := [][]tgbotapi.KeyboardButton{
 		{
 			tgbotapi.NewKeyboardButton("🏗️ Рефлексия"),
-			tgbotapi.NewKeyboardButton("🏗️ Сонник"),
+			tgbotapi.NewKeyboardButton("Сонник"),
 		},
 		{
 			tgbotapi.NewKeyboardButton("Предсказания"),

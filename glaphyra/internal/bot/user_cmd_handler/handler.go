@@ -2,12 +2,13 @@ package user_cmd_handler
 
 import (
 	"fmt"
-	"glaphyra/internal/bot/commands/about"
-	"glaphyra/internal/bot/commands/compatibility"
 	"sync"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"glaphyra/internal/bot"
+	"glaphyra/internal/bot/commands/about"
+	"glaphyra/internal/bot/commands/compatibility"
+	"glaphyra/internal/bot/commands/dreambook"
 	"glaphyra/internal/bot/commands/predictions"
 	"glaphyra/internal/bot/commands/settings"
 	"glaphyra/internal/pkg/log"
@@ -98,6 +99,15 @@ func (i *implUserCmdHandler) handleUnknownCommand(userID int64, api *tgbotapi.Bo
 	switch cmd.(type) {
 	case *compatibility.NatalCompCommand:
 		_, err := cmd.(*compatibility.NatalCompCommand).SendResult(api, message)
+		if err != nil {
+			responseMsg = "Что-то пошло не так, попробуйте снова"
+			break
+		}
+		back := &BackCommand{commandHistory: history.(*CommandHistory)}
+		_, err = back.Execute(api, message)
+		return
+	case *dreambook.DreambookCommand:
+		_, err := cmd.(*dreambook.DreambookCommand).SendResult(api, message)
 		if err != nil {
 			responseMsg = "Что-то пошло не так, попробуйте снова"
 			break
