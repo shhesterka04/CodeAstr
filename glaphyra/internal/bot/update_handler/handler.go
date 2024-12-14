@@ -44,7 +44,7 @@ func (i *implUpdateHandler) HandleUpdate(update tgbotapi.Update) {
 	case update.CallbackQuery != nil:
 		userID = update.CallbackQuery.From.ID
 		messageID := update.CallbackQuery.Message.MessageID
-		err := i.cmdHandler.HandleUserCallback(int64(messageID), update.CallbackQuery)
+		err := i.cmdHandler.HandleUserCallback(int64(messageID), userID, update.CallbackQuery)
 		if err != nil {
 			log.Println(err)
 		}

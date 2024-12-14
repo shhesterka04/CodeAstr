@@ -21,7 +21,7 @@ type implUserCmdHandler struct {
 
 type UserCommandHandler interface {
 	HandleUserCommand(userID int64, cmd bot.Command, message *tgbotapi.Message) error
-	HandleUserCallback(msgID int64, message *tgbotapi.CallbackQuery) error
+	HandleUserCallback(msgID int64, userID int64, message *tgbotapi.CallbackQuery) error
 }
 
 func NewUserCmdHandler(api *tgbotapi.BotAPI) UserCommandHandler {
@@ -57,7 +57,7 @@ func (i *implUserCmdHandler) HandleUserCommand(userID int64, cmd bot.Command, me
 	return nil
 }
 
-func (i *implUserCmdHandler) HandleUserCallback(msgID int64, callback *tgbotapi.CallbackQuery) error {
+func (i *implUserCmdHandler) HandleUserCallback(msgID int64, userID int64, callback *tgbotapi.CallbackQuery) error {
 	if msgID == 0 {
 		return nil
 	}
@@ -67,16 +67,21 @@ func (i *implUserCmdHandler) HandleUserCallback(msgID int64, callback *tgbotapi.
 		return nil
 	}
 
+	history, _ := i.userCommandHistories.LoadOrStore(userID, &CommandHistory{})
 	switch cmd.(type) {
 	case *compatibility.NatalCompCommand:
 	case *predictions.HoroscopeCommand:
 		cmd.(*predictions.HoroscopeCommand).SendPrompt(i.api, callback)
+		back := &BackCommand{commandHistory: history.(*CommandHistory)}
+		back.Execute(i.api, callback.Message)
 	case *compatibility.ZodiakCompCommand:
 		if !cmd.(*compatibility.ZodiakCompCommand).IsFirstFull(callback.From.ID) {
 			msgSecondID, _ := cmd.(*compatibility.ZodiakCompCommand).GetFirstSignSendSecond(i.api, callback)
 			i.messageIDToCommandID.LoadOrStore(msgSecondID, cmd)
 		} else {
 			cmd.(*compatibility.ZodiakCompCommand).GetSecondSignSendResult(i.api, callback)
+			back := &BackCommand{commandHistory: history.(*CommandHistory)}
+			back.Execute(i.api, callback.Message)
 		}
 
 	default:
