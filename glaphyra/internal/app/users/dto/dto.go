@@ -53,3 +53,10 @@ type UpdateUserRequest struct {
 	BirthPlace string
 	Tokens     int32
 }
+
+type ReflectionRecord struct {
+	UserID   int64
+	Mark     int
+	Emotions string
+	Activity string
+}

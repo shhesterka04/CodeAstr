@@ -24,6 +24,7 @@ type Repository interface {
 	DeleteByID(ctx context.Context, TgID int64) error
 	UpdateByTgID(ctx context.Context, req *dto.UpdateUserRequest) error
 	SaveFeedback(ctx context.Context, tgID int64, feedback string) error
+	SaveReflection(ctx context.Context, reflectionRecord dto.ReflectionRecord) error
 }
 
 type repository struct {
@@ -122,6 +123,29 @@ func (r *repository) SaveFeedback(ctx context.Context, tgID int64, feedback stri
 	}
 
 	query, args, err := sq.Insert(tables.Feedback).PlaceholderFormat(sq.Dollar).SetMap(valuesMap).ToSql()
+	if err != nil {
+		return log.Wrap(err)
+	}
+
+	_, err = r.db.Exec(ctx, query, args...)
+
+	if err != nil {
+		return log.Wrap(err)
+	}
+
+	return nil
+}
+
+func (r *repository) SaveReflection(ctx context.Context, reflectionRecord dto.ReflectionRecord) error {
+	valuesMap := map[string]interface{}{
+		"tg_id":       reflectionRecord.UserID,
+		"mood_rating": reflectionRecord.Mark,
+		"emotions":    reflectionRecord.Emotions,
+		"activity":    reflectionRecord.Activity,
+		"created_at":  time.Now(),
+	}
+
+	query, args, err := sq.Insert(tables.Reflections).PlaceholderFormat(sq.Dollar).SetMap(valuesMap).ToSql()
 	if err != nil {
 		return log.Wrap(err)
 	}
