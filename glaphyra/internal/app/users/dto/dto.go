@@ -30,10 +30,14 @@ type User struct {
 	RegistrationDate time.Time
 	BirthDate        time.Time
 	ZodiacSign       zodiac_signs.ZodiacSign
-	BirthTime        time.Time
+	BirthTime        string
+	FamilyStatus     string
+	TypeOfActivity   string
 	BirthPlace       string
 	FriendCode       string
 	Tokens           int32
+	NotificationTime int32
+	LastActionTime   time.Time
 }
 
 type CreateUserRequest struct {
@@ -43,13 +47,17 @@ type CreateUserRequest struct {
 }
 
 type UpdateUserRequest struct {
-	TgID       int64
-	Username   string
-	Style      string
-	Gender     string
-	BirthDate  time.Time
-	ZodiacSign zodiac_signs.ZodiacSign
-	BirthTime  time.Time
-	BirthPlace string
-	Tokens     int32
+	TgID             int64
+	Username         string
+	Style            string
+	Gender           string
+	BirthDate        time.Time
+	ZodiacSign       zodiac_signs.ZodiacSign
+	BirthTime        string
+	BirthPlace       string
+	Tokens           int32
+	FamilyStatus     string
+	TypeOfActivity   string
+	NotificationTime int32
+	LastActionTime   time.Time
 }

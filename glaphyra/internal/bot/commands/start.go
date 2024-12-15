@@ -67,11 +67,13 @@ func (c *StartCommand) getReplyMsg(message *tgbotapi.Message, isNewUser bool) tg
 		"🔮 Я помогу тебе разобраться в астрологических прогнозах и найти ответы среди звёзд. Что хочешь узнать первым?",
 	}
 
+	settingsMessage := "\nДля более релевантных ответов советуем тебе заполнить данные о себе\nТы можешь найти их перейдя в раздел Регистрация и настройки -> О себе"
+
 	rand.Seed(time.Now().UnixNano())
 	idx := rand.Intn(len(startMessages))
 	startMessage := startMessages[idx]
 	if isNewUser {
-		startMessage = greatings[idx] + startMessage
+		startMessage = greatings[idx] + startMessage + settingsMessage
 	}
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, startMessage)

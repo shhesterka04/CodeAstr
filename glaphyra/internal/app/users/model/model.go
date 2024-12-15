@@ -14,8 +14,12 @@ type User struct {
 	RegistrationDate time.Time           `db:"registration_date"`
 	BirthDate        sql.Null[time.Time] `db:"birth_date"`
 	ZodiacSign       sql.Null[string]    `db:"zodiac_sign"`
-	BirthTime        sql.Null[time.Time] `db:"birth_time"`
+	BirthTime        sql.Null[string]    `db:"birth_time"`
 	BirthPlace       sql.Null[string]    `db:"birth_place"`
 	FriendCode       sql.Null[string]    `db:"friend_code"`
 	Tokens           sql.Null[int32]     `db:"tokens"`
+	FamilyStatus     sql.Null[string]    `db:"family_status"`
+	TypeOfActivity   sql.Null[string]    `db:"type_of_activity"`
+	NotificationTime sql.Null[int32]     `db:"notification_time"`
+	LastActionTime   sql.Null[time.Time] `db:"last_action_time"`
 }

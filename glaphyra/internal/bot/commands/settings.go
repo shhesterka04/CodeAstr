@@ -29,7 +29,7 @@ func (c *SettingsCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Messag
 		},
 		{
 			tgbotapi.NewKeyboardButton("Выбор стиля общения"),
-			tgbotapi.NewKeyboardButton("Ввод даты рождения"),
+			tgbotapi.NewKeyboardButton("О себе"),
 		},
 		{
 			tgbotapi.NewKeyboardButton("Назад"),
