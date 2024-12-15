@@ -19,7 +19,7 @@ func NewBot(tgToken string, userSrv userservice.UserService, gptApi handlers.Han
 	if err != nil {
 		return nil, err
 	}
-	userCmdHandler := user_cmd_handler.NewUserCmdHandler(api)
+	userCmdHandler := user_cmd_handler.NewUserCmdHandler(api, userSrv)
 	updateHandler := update_handler.NewUpdateHandler(userCmdHandler, userSrv, gptApi)
 
 	return &Bot{api: api, handler: updateHandler}, nil

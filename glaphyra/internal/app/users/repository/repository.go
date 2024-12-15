@@ -67,6 +67,10 @@ func (r *repository) UpdateByTgID(ctx context.Context, req *dto.UpdateUserReques
 	valuesMap = utils.SetIfNotZero(valuesMap, "birth_time", req.BirthTime)
 	valuesMap = utils.SetIfNotZero(valuesMap, "birth_place", req.BirthPlace)
 	valuesMap = utils.SetIfNotZero(valuesMap, "tokens", req.Tokens)
+	valuesMap = utils.SetIfNotZero(valuesMap, "type_of_activity", req.TypeOfActivity)
+	valuesMap = utils.SetIfNotZero(valuesMap, "notification_time", req.NotificationTime)
+	valuesMap = utils.SetIfNotZero(valuesMap, "family_status", req.FamilyStatus)
+	valuesMap = utils.SetIfNotZero(valuesMap, "last_action_time", req.LastActionTime)
 
 	query, args, err := sq.Update(tables.Users).Where(sq.Eq{"tg_id": req.TgID}).SetMap(valuesMap).PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
@@ -216,6 +220,22 @@ func modelToDTO(user *model.User) *dto.User {
 		userDTO.Tokens = user.Tokens.V
 	}
 
+	if user.TypeOfActivity.Valid {
+		userDTO.TypeOfActivity = user.TypeOfActivity.V
+	}
+
+	if user.FamilyStatus.Valid {
+		userDTO.FamilyStatus = user.FamilyStatus.V
+	}
+
+	if user.NotificationTime.Valid {
+		userDTO.NotificationTime = user.NotificationTime.V
+	}
+
+	if user.NotificationTime.Valid {
+		userDTO.LastActionTime = user.LastActionTime.V
+	}
+
 	return &userDTO
 }
 
@@ -233,6 +253,9 @@ func buildFindByIDQuery(tgID int64) sq.SelectBuilder {
 		"birth_time",
 		"friend_code",
 		"tokens",
+		"family_status",
+		"type_of_activity",
+		"notification_time",
 	).
 		From(tables.Users).
 		Where(sq.Eq{"tg_id": tgID}).

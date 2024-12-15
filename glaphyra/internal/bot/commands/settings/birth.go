@@ -58,38 +58,42 @@ func (c *Birth) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64,
 func (c *Birth) SetBirth(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
 	ctx := context.Background()
 
-	answerMsg := "Вы успешно изменили дату рождения!"
-
+	answerMsg := ""
 	const layout = "02.01.2006"
 
-	birthDate, err := time.Parse(layout, message.Text)
-	if err != nil {
+	birthDate, errParse := time.Parse(layout, message.Text)
+	if errParse != nil {
 		answerMsg = "Мы не смогли распознать дату рождения :( Попробуйте снова"
+		errParse = &ValidationError{}
 	}
 
-	msg := tgbotapi.NewMessage(message.Chat.ID, answerMsg)
+	if answerMsg != "" {
+		msg := tgbotapi.NewMessage(message.Chat.ID, answerMsg)
 
-	err = c.userSrv.Update(
+		buttons := [][]tgbotapi.KeyboardButton{
+			{
+				tgbotapi.NewKeyboardButton("Назад"),
+			},
+		}
+
+		keyboard := tgbotapi.NewReplyKeyboard(buttons...)
+		msg.ReplyMarkup = keyboard
+
+		_, err := api.Send(msg)
+		if err != nil {
+			return 0, log.Wrap(err)
+		}
+
+		return 0, errParse
+	}
+
+	err := c.userSrv.Update(
 		ctx,
 		&dto.UpdateUserRequest{
 			TgID:      message.From.ID,
 			BirthDate: birthDate,
 		},
 	)
-	if err != nil {
-		return 0, log.Wrap(err)
-	}
-
-	buttons := [][]tgbotapi.KeyboardButton{
-		{
-			tgbotapi.NewKeyboardButton("Назад"),
-		},
-	}
-
-	keyboard := tgbotapi.NewReplyKeyboard(buttons...)
-	msg.ReplyMarkup = keyboard
-
-	_, err = api.Send(msg)
 	if err != nil {
 		return 0, log.Wrap(err)
 	}
