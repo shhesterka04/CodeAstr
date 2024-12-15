@@ -1,6 +1,7 @@
 package tables
 
 const (
-	Users    = "users"
-	Feedback = "feedback"
+	Users       = "users"
+	Feedback    = "feedback"
+	Reflections = "reflections"
 )

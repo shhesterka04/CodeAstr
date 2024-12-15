@@ -14,6 +14,7 @@ type UserService interface {
 	Update(ctx context.Context, req *dto.UpdateUserRequest) error
 	Delete(ctx context.Context, tgID int64) error
 	SaveFeedback(ctx context.Context, tgID int64, feedback string) error
+	SaveReflection(ctx context.Context, reflectionRecord dto.ReflectionRecord) error
 }
 
 type implementSrv struct {
@@ -64,6 +65,15 @@ func (i *implementSrv) Delete(ctx context.Context, tgID int64) error {
 
 func (i *implementSrv) SaveFeedback(ctx context.Context, tgID int64, feedback string) error {
 	err := i.repo.SaveFeedback(ctx, tgID, feedback)
+	if err != nil {
+		return log.Wrap(err)
+	}
+
+	return nil
+}
+
+func (i *implementSrv) SaveReflection(ctx context.Context, reflectionRecord dto.ReflectionRecord) error {
+	err := i.repo.SaveReflection(ctx, reflectionRecord)
 	if err != nil {
 		return log.Wrap(err)
 	}

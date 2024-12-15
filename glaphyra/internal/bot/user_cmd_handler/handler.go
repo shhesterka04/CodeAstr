@@ -10,6 +10,7 @@ import (
 	"glaphyra/internal/bot/commands/compatibility"
 	"glaphyra/internal/bot/commands/dreambook"
 	"glaphyra/internal/bot/commands/predictions"
+	"glaphyra/internal/bot/commands/reflection"
 	"glaphyra/internal/bot/commands/settings"
 	"glaphyra/internal/pkg/log"
 )
@@ -111,6 +112,37 @@ func (i *implUserCmdHandler) handleUnknownCommand(userID int64, api *tgbotapi.Bo
 		if err != nil {
 			responseMsg = "Что-то пошло не так, попробуйте снова"
 			break
+		}
+		back := &BackCommand{commandHistory: history.(*CommandHistory)}
+		_, err = back.Execute(api, message)
+		return
+	case *reflection.ReflectionCommand:
+		reflectionCmd := cmd.(*reflection.ReflectionCommand)
+		reflectionRecord := reflectionCmd.GetUserData(userID)
+		if reflectionRecord == nil {
+			_, err := reflectionCmd.GetMarkSendEmotions(api, message)
+			if err != nil {
+				responseMsg = "Что-то пошло не так, попробуйте снова"
+			}
+			return
+		}
+		if reflectionRecord.Mark == 0 {
+			_, err := reflectionCmd.GetMarkSendEmotions(api, message)
+			if err != nil {
+				responseMsg = "Что-то пошло не так, попробуйте снова"
+			}
+			return
+		}
+		if reflectionRecord.Emotions == "" {
+			_, err := reflectionCmd.GetEmotionsSendActivity(api, message)
+			if err != nil {
+				responseMsg = "Что-то пошло не так, попробуйте снова"
+			}
+			return
+		}
+		_, err := reflectionCmd.GetActivitySendResult(api, message)
+		if err != nil {
+			responseMsg = "Что-то пошло не так, попробуйте снова"
 		}
 		back := &BackCommand{commandHistory: history.(*CommandHistory)}
 		_, err = back.Execute(api, message)

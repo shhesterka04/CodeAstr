@@ -11,6 +11,7 @@ import (
 	"glaphyra/internal/bot/commands/compatibility"
 	"glaphyra/internal/bot/commands/dreambook"
 	"glaphyra/internal/bot/commands/predictions"
+	"glaphyra/internal/bot/commands/reflection"
 	"glaphyra/internal/bot/commands/settings"
 	"glaphyra/internal/bot/user_cmd_handler"
 	"glaphyra/internal/llm/handlers"
@@ -65,6 +66,7 @@ func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService, gp
 
 	i.registry.Register("Предсказания", &cmd.PredictionsCommand{})
 	i.registry.Register("Сонник", dreambook.NewDreambookCommand(userSrv, gptApi))
+	i.registry.Register("Рефлексия", reflection.NewReflectionCommand(userSrv, gptApi))
 	i.registry.Register("Совместимость", &cmd.CompatibilityCommand{})
 	i.registry.Register("Регистрация и настройки", &cmd.SettingsCommand{})
 	i.registry.Register("О боте", &cmd.AboutCommand{})
