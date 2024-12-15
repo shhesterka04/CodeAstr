@@ -104,7 +104,7 @@ func (r *repository) Create(ctx context.Context, req *dto.CreateUserRequest) err
 		"type":              req.Type,
 		"registration_date": time.Now(),
 		"friend_code":       friendCode,
-		"tokens":            0,
+		"tokens":            100,
 		"notification_time": 18,
 	}
 

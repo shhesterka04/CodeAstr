@@ -7,12 +7,13 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"glaphyra/internal/app/users/dto"
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/bot"
 	"glaphyra/internal/bot/update_handler"
 	"glaphyra/internal/bot/user_cmd_handler"
 	"glaphyra/internal/llm/handlers"
-	"glaphyra/internal/llm/yagpt/dto"
+	yadto "glaphyra/internal/llm/yagpt/dto"
 	"glaphyra/internal/pkg/log"
 )
 
@@ -98,6 +99,10 @@ func (b *Bot) handleHourlyTask(hour int) {
 	rand.Seed(time.Now().UnixNano())
 	ids, _ := b.userSrv.GetUsersByNotificationTime(context.Background(), hour)
 	for _, id := range ids {
+		b.userSrv.Update(context.Background(), &dto.UpdateUserRequest{
+			TgID:   id,
+			Tokens: 100,
+		})
 		b.api.Send(tgbotapi.NewMessage(id, msgVars[rand.Intn(len(msgVars))]))
 	}
 }
@@ -107,7 +112,7 @@ func (b *Bot) handleWeeklyTask(hour int) {
 	for _, id := range ids {
 		reflections, _ := b.userSrv.GetReflectionsByUserIDLastWeekFormat(context.Background(), id)
 		usr, _ := b.userSrv.FindByID(context.Background(), id)
-		yaResponse, err := b.gptApi.CallAPI(dto.RequestDTO{
+		yaResponse, err := b.gptApi.CallAPI(yadto.RequestDTO{
 			UserMessage: fmt.Sprintf(
 				summaryPrompt,
 				reflections,
@@ -117,7 +122,7 @@ func (b *Bot) handleWeeklyTask(hour int) {
 			log.Wrap(err)
 		}
 
-		response, ok := yaResponse.(dto.ResponseDTO)
+		response, ok := yaResponse.(yadto.ResponseDTO)
 		if !ok {
 			log.Wrap(err)
 		}

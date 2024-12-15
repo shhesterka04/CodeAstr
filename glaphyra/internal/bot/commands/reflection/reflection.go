@@ -70,6 +70,26 @@ func (c *ReflectionCommand) GetUserData(userID int64) *dto.ReflectionRecord {
 	return refdata
 }
 func (c *ReflectionCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
+	usr, err := c.userSrv.FindByID(context.Background(), message.From.ID)
+	if err != nil {
+		return 0, log.Wrap(err)
+	}
+	if usr.Tokens <= 0 {
+		msg := tgbotapi.NewMessage(message.Chat.ID, "У вас закончились токены.. Приходите завтра")
+		if _, err := api.Send(msg); err != nil {
+			return 0, log.Wrap(err)
+		}
+
+		return 0, nil
+	}
+
+	if err = c.userSrv.Update(context.Background(), &dto.UpdateUserRequest{
+		TgID:   message.From.ID,
+		Tokens: usr.Tokens - 5,
+	}); err != nil {
+		return 0, log.Wrap(err)
+	}
+
 	msg := tgbotapi.NewMessage(message.Chat.ID, markPrompt)
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(

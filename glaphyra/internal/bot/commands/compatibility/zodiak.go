@@ -8,10 +8,11 @@ import (
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"glaphyra/internal/app/users/dto"
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/bot/commands/predictions"
 	"glaphyra/internal/llm/handlers"
-	"glaphyra/internal/llm/yagpt/dto"
+	yadto "glaphyra/internal/llm/yagpt/dto"
 	"glaphyra/internal/pkg/log"
 )
 
@@ -58,6 +59,26 @@ func (c *ZodiakCompCommand) IsFirstFull(userID int64) bool {
 }
 
 func (c *ZodiakCompCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
+	usr, err := c.userSrv.FindByID(context.Background(), message.From.ID)
+	if err != nil {
+		return 0, log.Wrap(err)
+	}
+	if usr.Tokens <= 0 {
+		msg := tgbotapi.NewMessage(message.Chat.ID, "У вас закончились токены.. Приходите завтра")
+		if _, err := api.Send(msg); err != nil {
+			return 0, log.Wrap(err)
+		}
+
+		return 0, nil
+	}
+
+	if err = c.userSrv.Update(context.Background(), &dto.UpdateUserRequest{
+		TgID:   message.From.ID,
+		Tokens: usr.Tokens - 5,
+	}); err != nil {
+		return 0, log.Wrap(err)
+	}
+
 	rand.Seed(time.Now().UnixNano())
 	randomIndex := rand.Intn(len(zodiakMag))
 	msgVar := zodiakMag[randomIndex]
@@ -128,7 +149,7 @@ func (c *ZodiakCompCommand) GetSecondSignSendResult(api *tgbotapi.BotAPI, callba
 		api.Send(typingMsg)
 	}()
 
-	yaResponse, err := c.gptApi.CallAPI(dto.RequestDTO{
+	yaResponse, err := c.gptApi.CallAPI(yadto.RequestDTO{
 		UserMessage: fmt.Sprintf(
 			compatibilityPromt,
 			firstSign,
@@ -141,7 +162,7 @@ func (c *ZodiakCompCommand) GetSecondSignSendResult(api *tgbotapi.BotAPI, callba
 	if err != nil {
 		return log.Wrap(err)
 	}
-	response, ok := yaResponse.(dto.ResponseDTO)
+	response, ok := yaResponse.(yadto.ResponseDTO)
 	if !ok {
 		return log.Wrap(err)
 	}
