@@ -1,10 +1,10 @@
-yagpt-key: "t1.9euelZrMmpuOkIvGlJCZmsjMj8vPyu3rnpWamIySiYqWz8zIi8ubx5TMis_l8_cdc1dF-e9WLytz_t3z910hVUX571YvK3P-zef1656VmpeclJyViYqUmZWJl8jHysbI7_zF656VmpeclJyViYqUmZWJl8jHysbI.6QsHuhJ-xdjAFOrnwYPsQE3VcIwfQdVXZjng2q3v_RIKVl4jh5Xe5dUEf3eKnsNBBTkrkCjvBgKiWhxFamhaDQ"
+yagpt-key: "AQVNz5oU748RvmUL1kdM-N5sy2cRj3wIKenTY7VS"
 yagpt-model: "gpt://b1g220bgvm635prvi53g/yandexgpt-lite"
 yagpt-temperature: 0.6
 yagpt-max-tokens: 2000
 yagpt-system-message: "Представь, что ты мудрая гадалка"
 
-db-dsn: "postgres://test:test@database:5432/test?sslmode=disable"
+db-dsn: "postgres://test:test@localhost:5432/test?sslmode=disable"
 
-tg-token: "8096088977:AAEQJYPk2ihyfZ2badyeCfop_6oW8G78tRU"
+tg-token: "7742188242:AAE2_HnGqKiihUwjTrA8gkc0_a9tG-4wZ5k"
 

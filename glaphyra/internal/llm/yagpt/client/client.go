@@ -84,7 +84,7 @@ func (c *YaGPTClient) buildHTTPRequest(body []byte) (*http.Request, error) {
 		return nil, err
 	}
 
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", c.config.YagptKey))
+	req.Header.Set("Authorization", fmt.Sprintf("Api-Key %s", c.config.YagptKey))
 	req.Header.Set("Content-Type", "application/json")
 	return req, nil
 }
