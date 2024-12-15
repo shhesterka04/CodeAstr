@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -138,7 +137,6 @@ func (r *repository) SaveFeedback(ctx context.Context, tgID int64, feedback stri
 }
 
 func (r *repository) SaveReflection(ctx context.Context, reflectionRecord dto.ReflectionRecord) error {
-	fmt.Println(reflectionRecord)
 	valuesMap := map[string]interface{}{
 		"tg_id":       reflectionRecord.UserID,
 		"mood_rating": reflectionRecord.Mark,
@@ -147,14 +145,10 @@ func (r *repository) SaveReflection(ctx context.Context, reflectionRecord dto.Re
 		"created_at":  time.Now(),
 	}
 
-	fmt.Println(valuesMap)
-
 	query, args, err := sq.Insert(tables.Reflections).PlaceholderFormat(sq.Dollar).SetMap(valuesMap).ToSql()
 	if err != nil {
 		return log.Wrap(err)
 	}
-
-	fmt.Println(query, args, err)
 
 	_, err = r.db.Exec(ctx, query, args...)
 
