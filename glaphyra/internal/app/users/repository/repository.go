@@ -25,6 +25,8 @@ type Repository interface {
 	UpdateByTgID(ctx context.Context, req *dto.UpdateUserRequest) error
 	SaveFeedback(ctx context.Context, tgID int64, feedback string) error
 	SaveReflection(ctx context.Context, reflectionRecord dto.ReflectionRecord) error
+	GetUsersByNotificationTime(ctx context.Context, notificationTime int) ([]int64, error)
+	GetReflectionsByUserIDLastWeek(ctx context.Context, userID int64) ([]dto.ReflectionRecord, error)
 }
 
 type repository struct {
@@ -103,6 +105,7 @@ func (r *repository) Create(ctx context.Context, req *dto.CreateUserRequest) err
 		"registration_date": time.Now(),
 		"friend_code":       friendCode,
 		"tokens":            0,
+		"notification_time": 18,
 	}
 
 	query, args, err := sq.Insert(tables.Users).PlaceholderFormat(sq.Dollar).SetMap(valuesMap).ToSql()
@@ -262,4 +265,49 @@ func buildFindByIDQuery(tgID int64) sq.SelectBuilder {
 		PlaceholderFormat(sq.Dollar)
 
 	return queryBuilder
+}
+
+func (r *repository) GetUsersByNotificationTime(ctx context.Context, notificationTime int) ([]int64, error) {
+	var users []int64
+
+	query, args, err := sq.Select("tg_id").
+		From(tables.Users).
+		Where(sq.Eq{"notification_time": notificationTime}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, log.Wrap(err)
+	}
+
+	err = r.db.Select(ctx, &users, query, args...)
+	if err != nil {
+		return nil, log.Wrap(err)
+	}
+
+	return users, nil
+}
+
+func (r *repository) GetReflectionsByUserIDLastWeek(ctx context.Context, userID int64) ([]dto.ReflectionRecord, error) {
+	var reflections []dto.ReflectionRecord
+
+	query, args, err := sq.Select(
+		"mood_rating",
+		"emotions",
+		"activity",
+	).
+		From(tables.Reflections).
+		Where(sq.Eq{"tg_id": userID}).
+		Where("created_at > now() - interval '1 week'").
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, log.Wrap(err)
+	}
+
+	err = r.db.Select(ctx, &reflections, query, args...)
+	if err != nil {
+		return nil, log.Wrap(err)
+	}
+
+	return reflections, nil
 }

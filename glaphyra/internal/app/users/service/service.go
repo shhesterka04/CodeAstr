@@ -2,6 +2,9 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"strconv"
+	"strings"
 
 	"glaphyra/internal/app/users/dto"
 	usersrepository "glaphyra/internal/app/users/repository"
@@ -15,6 +18,8 @@ type UserService interface {
 	Delete(ctx context.Context, tgID int64) error
 	SaveFeedback(ctx context.Context, tgID int64, feedback string) error
 	SaveReflection(ctx context.Context, reflectionRecord dto.ReflectionRecord) error
+	GetUsersByNotificationTime(ctx context.Context, notificationTime int) ([]int64, error)
+	GetReflectionsByUserIDLastWeekFormat(ctx context.Context, userID int64) (string, error)
 }
 
 type implementSrv struct {
@@ -79,4 +84,44 @@ func (i *implementSrv) SaveReflection(ctx context.Context, reflectionRecord dto.
 	}
 
 	return nil
+}
+
+func (i *implementSrv) GetUsersByNotificationTime(ctx context.Context, notificationTime int) ([]int64, error) {
+	users, err := i.repo.GetUsersByNotificationTime(ctx, notificationTime)
+	if err != nil {
+		return nil, log.Wrap(err)
+	}
+
+	return users, nil
+}
+
+func (i *implementSrv) GetReflectionsByUserIDLastWeek(ctx context.Context, userID int64) ([]dto.ReflectionRecord, error) {
+	reflections, err := i.repo.GetReflectionsByUserIDLastWeek(ctx, userID)
+	if err != nil {
+		return nil, log.Wrap(err)
+	}
+
+	return reflections, nil
+}
+
+func (i *implementSrv) GetReflectionsByUserIDLastWeekFormat(ctx context.Context, userID int64) (string, error) {
+	reflections, err := i.repo.GetReflectionsByUserIDLastWeek(ctx, userID)
+	if err != nil {
+		return "", log.Wrap(err)
+	}
+
+	var moodMarks []string
+	var feelings []string
+	var actions []string
+
+	for _, reflection := range reflections {
+		moodMarks = append(moodMarks, strconv.Itoa(reflection.Mark))
+		feelings = append(feelings, reflection.Emotions)
+		actions = append(actions, reflection.Activity)
+	}
+
+	result := fmt.Sprintf("оценки за неделю: %s; что чувствовали: %s; что делали: %s",
+		strings.Join(moodMarks, ", "), strings.Join(feelings, ", "), strings.Join(actions, ", "))
+
+	return result, nil
 }
