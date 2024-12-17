@@ -4,10 +4,6 @@ import (
 	"context"
 	"time"
 
-	sq "github.com/Masterminds/squirrel"
-	"github.com/google/uuid"
-	"github.com/jackc/pgx/v4"
-	"github.com/pkg/errors"
 	"glaphyra/internal/app/users/dto"
 	"glaphyra/internal/app/users/model"
 	"glaphyra/internal/pkg/db"
@@ -16,6 +12,11 @@ import (
 	"glaphyra/internal/pkg/log"
 	"glaphyra/internal/pkg/tables"
 	"glaphyra/internal/pkg/zodiac_signs"
+
+	sq "github.com/Masterminds/squirrel"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v4"
+	"github.com/pkg/errors"
 )
 
 type Repository interface {
@@ -73,6 +74,10 @@ func (r *repository) UpdateByTgID(ctx context.Context, req *dto.UpdateUserReques
 	valuesMap = utils.SetIfNotZero(valuesMap, "notification_time", req.NotificationTime)
 	valuesMap = utils.SetIfNotZero(valuesMap, "family_status", req.FamilyStatus)
 	valuesMap = utils.SetIfNotZero(valuesMap, "last_action_time", req.LastActionTime)
+
+	if len(valuesMap) == 0 {
+		return nil
+	}
 
 	query, args, err := sq.Update(tables.Users).Where(sq.Eq{"tg_id": req.TgID}).SetMap(valuesMap).PlaceholderFormat(sq.Dollar).ToSql()
 	if err != nil {
