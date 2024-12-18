@@ -12,7 +12,6 @@ import (
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/bot"
 	maincmd "glaphyra/internal/bot/commands"
-	"glaphyra/internal/bot/commands/about"
 	"glaphyra/internal/bot/commands/compatibility"
 	"glaphyra/internal/bot/commands/dreambook"
 	"glaphyra/internal/bot/commands/predictions"
@@ -280,8 +279,8 @@ func (i *implUserCmdHandler) handleUnknownCommand(userID int64, api *tgbotapi.Bo
 			history.(*CommandHistory).Add(startCmd)
 		}
 		return
-	case *about.FeedbackCommand:
-		sent, err := cmd.(*about.FeedbackCommand).SaveOrSendFeedback(api, message)
+	case *settings.FeedbackCommand:
+		sent, err := cmd.(*settings.FeedbackCommand).SaveOrSendFeedback(api, message)
 		if err != nil {
 			log.Error(err)
 			responseMsg = "Что-то пошло не так, попробуйте снова"

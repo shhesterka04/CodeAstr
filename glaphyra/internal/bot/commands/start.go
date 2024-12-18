@@ -5,11 +5,12 @@ import (
 	"math/rand"
 	"time"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"glaphyra/internal/app/users/dto"
 	userservice "glaphyra/internal/app/users/service"
 	errs "glaphyra/internal/pkg/errors"
 	"glaphyra/internal/pkg/log"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type StartCommand struct {
@@ -88,8 +89,8 @@ func (c *StartCommand) getReplyMsg(message *tgbotapi.Message, isNewUser bool) tg
 			tgbotapi.NewKeyboardButton("Совместимость"),
 		},
 		{
+			tgbotapi.NewKeyboardButton("Натальная карта"),
 			tgbotapi.NewKeyboardButton("Регистрация и настройки"),
-			tgbotapi.NewKeyboardButton("О боте"),
 		},
 	}
 

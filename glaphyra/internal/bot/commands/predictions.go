@@ -4,8 +4,9 @@ import (
 	"math/rand"
 	"time"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"glaphyra/internal/pkg/log"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type PredictionsCommand struct{}
@@ -26,9 +27,9 @@ func (c *PredictionsCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Mes
 	buttons := [][]tgbotapi.KeyboardButton{
 		{
 			tgbotapi.NewKeyboardButton("Гороскоп на день"),
-			tgbotapi.NewKeyboardButton("Гороскоп на неделю"),
 		},
 		{
+			tgbotapi.NewKeyboardButton("Гороскоп на неделю"),
 			tgbotapi.NewKeyboardButton("Гороскоп на месяц"),
 		},
 		{

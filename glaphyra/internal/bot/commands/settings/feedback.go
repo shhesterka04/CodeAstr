@@ -1,4 +1,4 @@
-package about
+package settings
 
 import (
 	"context"
@@ -6,9 +6,10 @@ import (
 	"sync"
 	"time"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/pkg/log"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type FeedbackCommand struct {

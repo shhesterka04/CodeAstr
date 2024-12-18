@@ -6,7 +6,6 @@ import (
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/bot"
 	cmd "glaphyra/internal/bot/commands"
-	"glaphyra/internal/bot/commands/about"
 	"glaphyra/internal/bot/commands/compatibility"
 	"glaphyra/internal/bot/commands/dreambook"
 	"glaphyra/internal/bot/commands/predictions"
@@ -72,15 +71,11 @@ func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService, gp
 	i.registry.Register("Регистрация и настройки", &cmd.SettingsCommand{})
 	i.registry.Register("О боте", &cmd.AboutCommand{})
 
-	// О боте
-	i.registry.Register("Кто я?", &about.WhoAmICommand{})
-	i.registry.Register("Функции", &about.FunctionsCommand{})
-	i.registry.Register("Обратная связь", about.NewFeedbackCommand(userSrv))
-
 	// Предсказания
 	i.registry.Register("Гороскоп на день", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Daily))
 	i.registry.Register("Гороскоп на неделю", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Weekly))
 	i.registry.Register("Гороскоп на месяц", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Monthly))
+	i.registry.Register("Натальная карта", predictions.NewNatalCommand(userSrv, gptApi))
 
 	// Совместимость
 	i.registry.Register("Совместимость по знакам зодиака", compatibility.NewZodiakCompCommand(userSrv, gptApi))
@@ -92,5 +87,5 @@ func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService, gp
 	i.registry.Register("Шутливый стиль", settings.NewSetStyleCommand(userSrv, "Шутливый стиль"))
 	i.registry.Register("Дружелюбный стиль", settings.NewSetStyleCommand(userSrv, "Дружелюбный стиль"))
 	i.registry.Register("Заполнить 'О себе'", settings.NewBirthCommand(userSrv))
-
+	i.registry.Register("Обратная связь", settings.NewFeedbackCommand(userSrv))
 }
