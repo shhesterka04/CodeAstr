@@ -9,6 +9,7 @@ import (
 	"glaphyra/internal/app/users/dto"
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/bot/commands/predictions"
+	"glaphyra/internal/bot/commands/settings"
 	"glaphyra/internal/llm/handlers"
 	yadto "glaphyra/internal/llm/yagpt/dto"
 	"glaphyra/internal/pkg/log"
@@ -107,13 +108,34 @@ func (c *ReflectionCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Mess
 }
 
 func (c *ReflectionCommand) GetMarkSendEmotions(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
-	mark, err := strconv.Atoi(message.Text)
-	if err != nil || mark < 1 || mark > 10 {
-		return 0, ErrMarkInvalid
+	mark, errParse := strconv.Atoi(message.Text)
+	answerMsg := ""
+	if errParse != nil || mark < 1 || mark > 10 {
+		answerMsg = "Пожалуйста, введите число от 1 до 10"
+		errParse = &settings.ValidationError{}
+	}
+
+	if errParse != nil {
+		msg := tgbotapi.NewMessage(message.Chat.ID, answerMsg)
+
+		buttons := [][]tgbotapi.KeyboardButton{
+			{
+				tgbotapi.NewKeyboardButton("Назад"),
+			},
+		}
+
+		keyboard := tgbotapi.NewReplyKeyboard(buttons...)
+		msg.ReplyMarkup = keyboard
+
+		_, err := api.Send(msg)
+		if err != nil {
+			return 0, log.Wrap(err)
+		}
+
+		return 0, errParse
 	}
 
 	c.usersData.Store(message.From.ID, &dto.ReflectionRecord{UserID: message.From.ID, MoodRating: mark})
-
 	msg := tgbotapi.NewMessage(message.Chat.ID, emotionsPrompt)
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
 		tgbotapi.NewKeyboardButtonRow(

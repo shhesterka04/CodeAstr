@@ -159,8 +159,8 @@ func (i *implUserCmdHandler) handleUnknownCommand(userID int64, api *tgbotapi.Bo
 		}
 		if reflectionRecord.MoodRating == 0 {
 			_, err := reflectionCmd.GetMarkSendEmotions(api, message)
-			if err != nil {
-				responseMsg = "Что-то пошло не так, попробуйте снова"
+			if errs.As[settings.ValidationError](err) {
+				return
 			}
 			return
 		}
