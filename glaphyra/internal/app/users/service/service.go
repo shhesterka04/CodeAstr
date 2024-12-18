@@ -21,6 +21,7 @@ type UserService interface {
 	GetUsersByNotificationTime(ctx context.Context, notificationTime int) ([]int64, error)
 	GetReflectionsByUserIDLastWeekFormat(ctx context.Context, userID int64) (string, error)
 	GetReflectionsByUserIDLastWeek(ctx context.Context, userID int64) ([]dto.ReflectionRecord, error)
+	GetAllUsersIDs(ctx context.Context) ([]int64, error)
 }
 
 type implementSrv struct {
@@ -125,4 +126,13 @@ func (i *implementSrv) GetReflectionsByUserIDLastWeekFormat(ctx context.Context,
 		strings.Join(moodMarks, ", "), strings.Join(feelings, ", "), strings.Join(actions, ", "))
 
 	return result, nil
+}
+
+func (i *implementSrv) GetAllUsersIDs(ctx context.Context) ([]int64, error) {
+	ids, err := i.repo.GetAllUsersIDs(ctx)
+	if err != nil {
+		return nil, log.Wrap(err)
+	}
+
+	return ids, nil
 }

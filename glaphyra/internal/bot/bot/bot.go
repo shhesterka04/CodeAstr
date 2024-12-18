@@ -67,6 +67,14 @@ func (b *Bot) Start() {
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
+	ids, err := b.userSrv.GetAllUsersIDs(context.Background())
+	if err != nil {
+		log.Wrap(err)
+	}
+	for _, id := range ids {
+		b.api.Send(tgbotapi.NewMessage(id, "Привет! ✨ Я проснулся! Нажми /start, чтобы начать общение со мной\nКстати, у нас появились натальные карты 🔮🔮🔮"))
+	}
+
 	updates := b.api.GetUpdatesChan(u)
 
 	go b.startTicker()

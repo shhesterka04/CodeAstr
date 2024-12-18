@@ -28,6 +28,7 @@ type Repository interface {
 	SaveReflection(ctx context.Context, reflectionRecord dto.ReflectionRecord) error
 	GetUsersByNotificationTime(ctx context.Context, notificationTime int) ([]int64, error)
 	GetReflectionsByUserIDLastWeek(ctx context.Context, userID int64) ([]dto.ReflectionRecord, error)
+	GetAllUsersIDs(ctx context.Context) ([]int64, error)
 }
 
 type repository struct {
@@ -315,4 +316,23 @@ func (r *repository) GetReflectionsByUserIDLastWeek(ctx context.Context, userID 
 	}
 
 	return reflections, nil
+}
+
+func (r *repository) GetAllUsersIDs(ctx context.Context) ([]int64, error) {
+	var users []int64
+
+	query, args, err := sq.Select("tg_id").
+		From(tables.Users).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return nil, log.Wrap(err)
+	}
+
+	err = r.db.Select(ctx, &users, query, args...)
+	if err != nil {
+		return nil, log.Wrap(err)
+	}
+
+	return users, nil
 }
