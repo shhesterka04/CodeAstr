@@ -3,7 +3,6 @@ package update_handler
 import (
 	"log"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/bot"
 	cmd "glaphyra/internal/bot/commands"
@@ -15,6 +14,8 @@ import (
 	"glaphyra/internal/bot/commands/settings"
 	"glaphyra/internal/bot/user_cmd_handler"
 	"glaphyra/internal/llm/handlers"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 const backCommand = "Назад"
@@ -90,6 +91,6 @@ func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService, gp
 	i.registry.Register("Серьезный стиль", settings.NewSetStyleCommand(userSrv, "Серьезный стиль"))
 	i.registry.Register("Шутливый стиль", settings.NewSetStyleCommand(userSrv, "Шутливый стиль"))
 	i.registry.Register("Дружелюбный стиль", settings.NewSetStyleCommand(userSrv, "Дружелюбный стиль"))
-	i.registry.Register("О себе", settings.NewBirthCommand(userSrv))
+	i.registry.Register("Заполнить 'О себе'", settings.NewBirthCommand(userSrv))
 
 }

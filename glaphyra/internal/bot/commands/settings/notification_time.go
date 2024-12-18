@@ -4,10 +4,11 @@ import (
 	"context"
 	"strconv"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"glaphyra/internal/app/users/dto"
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/pkg/log"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type NotificationTime struct {
@@ -19,7 +20,7 @@ func NewNotificationTimeCommand(userSrv userservice.UserService) *NotificationTi
 }
 
 func (c *NotificationTime) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
-	birthMessage := "Введите, в какой час по МСК вы хотели бы получать форму рефлексии\nВведите одно число от 0 до 23"
+	birthMessage := "Введите, в какой час по МСК вы хотели бы получать форму рефлексии\nВведите одно число от 1 до 23"
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, birthMessage)
 
