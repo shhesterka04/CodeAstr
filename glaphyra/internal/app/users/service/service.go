@@ -20,6 +20,7 @@ type UserService interface {
 	SaveReflection(ctx context.Context, reflectionRecord dto.ReflectionRecord) error
 	GetUsersByNotificationTime(ctx context.Context, notificationTime int) ([]int64, error)
 	GetReflectionsByUserIDLastWeekFormat(ctx context.Context, userID int64) (string, error)
+	GetReflectionsByUserIDLastWeek(ctx context.Context, userID int64) ([]dto.ReflectionRecord, error)
 }
 
 type implementSrv struct {
@@ -115,7 +116,7 @@ func (i *implementSrv) GetReflectionsByUserIDLastWeekFormat(ctx context.Context,
 	var actions []string
 
 	for _, reflection := range reflections {
-		moodMarks = append(moodMarks, strconv.Itoa(reflection.Mark))
+		moodMarks = append(moodMarks, strconv.Itoa(reflection.MoodRating))
 		feelings = append(feelings, reflection.Emotions)
 		actions = append(actions, reflection.Activity)
 	}

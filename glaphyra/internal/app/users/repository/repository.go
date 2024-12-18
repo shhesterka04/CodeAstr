@@ -151,7 +151,7 @@ func (r *repository) SaveFeedback(ctx context.Context, tgID int64, feedback stri
 func (r *repository) SaveReflection(ctx context.Context, reflectionRecord dto.ReflectionRecord) error {
 	valuesMap := map[string]interface{}{
 		"tg_id":       reflectionRecord.UserID,
-		"mood_rating": reflectionRecord.Mark,
+		"mood_rating": reflectionRecord.MoodRating,
 		"emotions":    reflectionRecord.Emotions,
 		"activity":    reflectionRecord.Activity,
 		"created_at":  time.Now(),

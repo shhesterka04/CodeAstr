@@ -3,12 +3,12 @@ package user_cmd_handler
 import (
 	"context"
 	"fmt"
-	"glaphyra/internal/app/users/dto"
-	errs "glaphyra/internal/pkg/errors"
 	"sync"
 	"time"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"glaphyra/internal/app/users/dto"
+	errs "glaphyra/internal/pkg/errors"
+
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/bot"
 	maincmd "glaphyra/internal/bot/commands"
@@ -19,6 +19,8 @@ import (
 	"glaphyra/internal/bot/commands/reflection"
 	"glaphyra/internal/bot/commands/settings"
 	"glaphyra/internal/pkg/log"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type implUserCmdHandler struct {
@@ -155,7 +157,7 @@ func (i *implUserCmdHandler) handleUnknownCommand(userID int64, api *tgbotapi.Bo
 			}
 			return
 		}
-		if reflectionRecord.Mark == 0 {
+		if reflectionRecord.MoodRating == 0 {
 			_, err := reflectionCmd.GetMarkSendEmotions(api, message)
 			if err != nil {
 				responseMsg = "Что-то пошло не так, попробуйте снова"

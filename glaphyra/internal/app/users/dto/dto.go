@@ -63,8 +63,8 @@ type UpdateUserRequest struct {
 }
 
 type ReflectionRecord struct {
-	UserID   int64
-	Mark     int
-	Emotions string
-	Activity string
+	UserID     int64
+	MoodRating int
+	Emotions   string
+	Activity   string
 }

@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"time"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"glaphyra/internal/app/users/dto"
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/bot"
@@ -15,6 +14,8 @@ import (
 	"glaphyra/internal/llm/handlers"
 	yadto "glaphyra/internal/llm/yagpt/dto"
 	"glaphyra/internal/pkg/log"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 const summaryPrompt = "Привет, бот! Мне нужно подвести итоги недели для пользователя:- " +

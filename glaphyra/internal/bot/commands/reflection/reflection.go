@@ -6,14 +6,15 @@ import (
 	"strconv"
 	"sync"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/pkg/errors"
 	"glaphyra/internal/app/users/dto"
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/bot/commands/predictions"
 	"glaphyra/internal/llm/handlers"
 	yadto "glaphyra/internal/llm/yagpt/dto"
 	"glaphyra/internal/pkg/log"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/pkg/errors"
 )
 
 var (
@@ -111,7 +112,7 @@ func (c *ReflectionCommand) GetMarkSendEmotions(api *tgbotapi.BotAPI, message *t
 		return 0, ErrMarkInvalid
 	}
 
-	c.usersData.Store(message.From.ID, &dto.ReflectionRecord{UserID: message.From.ID, Mark: mark})
+	c.usersData.Store(message.From.ID, &dto.ReflectionRecord{UserID: message.From.ID, MoodRating: mark})
 
 	msg := tgbotapi.NewMessage(message.Chat.ID, emotionsPrompt)
 	msg.ReplyMarkup = tgbotapi.NewReplyKeyboard(
@@ -197,7 +198,7 @@ func (c *ReflectionCommand) genResult(api *tgbotapi.BotAPI, message *tgbotapi.Me
 	yaResponse, err := c.gptApi.CallAPI(yadto.RequestDTO{
 		UserMessage: fmt.Sprintf(
 			reflectionPrompt,
-			reflection.Mark,
+			reflection.MoodRating,
 			reflection.Emotions,
 			reflection.Activity,
 			usr.Style),
