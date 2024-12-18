@@ -86,10 +86,10 @@ func (b *Bot) startTicker() {
 		ticker := time.NewTicker(next.Sub(now))
 		<-ticker.C
 
-		b.handleHourlyTask(now.Hour())
+		b.handleHourlyTask(next.Hour())
 
 		if next.Weekday() == time.Sunday {
-			b.handleWeeklyTask(now.Hour())
+			b.handleWeeklyTask(next.Hour())
 		}
 
 		ticker.Stop()
@@ -104,6 +104,7 @@ func (b *Bot) handleHourlyTask(hour int) {
 			TgID:   id,
 			Tokens: 100,
 		})
+		fmt.Println("User with id", id, "received 100 tokens, hour: ", hour)
 		b.api.Send(tgbotapi.NewMessage(id, msgVars[rand.Intn(len(msgVars))]))
 	}
 }
