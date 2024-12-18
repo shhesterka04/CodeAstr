@@ -296,8 +296,11 @@ func (i *implUserCmdHandler) handleUnknownCommand(userID int64, api *tgbotapi.Bo
 		}
 		return
 	}
-	msg := tgbotapi.NewMessage(message.Chat.ID, responseMsg)
-	api.Send(msg)
+
+	if message != nil {
+		msg := tgbotapi.NewMessage(message.Chat.ID, responseMsg)
+		api.Send(msg)
+	}
 }
 
 type BackCommand struct {
