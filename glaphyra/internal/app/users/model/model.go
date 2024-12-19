@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	TgID             int32               `db:"tg_id"`
+	TgID             int64               `db:"tg_id"`
 	Username         string              `db:"username"`
 	Type             string              `db:"type"`
 	Style            sql.Null[string]    `db:"style"`
