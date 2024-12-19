@@ -22,7 +22,7 @@ const (
 )
 
 type User struct {
-	TgID             int32
+	TgID             int64
 	Username         string
 	Type             UserType
 	Style            string
