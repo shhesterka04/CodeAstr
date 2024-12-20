@@ -3,18 +3,20 @@ package compatibility
 import (
 	"context"
 	"fmt"
-	"glaphyra/internal/app/users/dto"
 	"math/rand"
 	"strings"
 	"sync"
 	"time"
 
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"glaphyra/internal/app/users/dto"
+
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/bot/commands/predictions"
 	"glaphyra/internal/llm/handlers"
 	yadto "glaphyra/internal/llm/yagpt/dto"
 	"glaphyra/internal/pkg/log"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
 type NatalCompCommand struct {
@@ -101,6 +103,14 @@ func (c *NatalCompCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Messa
 
 func (c *NatalCompCommand) SendResult(api *tgbotapi.BotAPI, message *tgbotapi.Message) (int64, error) {
 	data := strings.Split(message.Text, "\n")
+	if len(data) != 2 {
+		msg := tgbotapi.NewMessage(message.Chat.ID, "Неверный формат данных. Попробуйте еще раз")
+		if _, err := api.Send(msg); err != nil {
+			return 0, log.Wrap(err)
+		}
+
+		return 0, nil
+	}
 
 	wg := sync.WaitGroup{}
 	usr, err := c.userSrv.FindByID(context.Background(), message.From.ID)
