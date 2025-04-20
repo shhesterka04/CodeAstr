@@ -33,7 +33,7 @@ func (c *StartCommand) Execute(api *tgbotapi.BotAPI, message *tgbotapi.Message) 
 			&dto.CreateUserRequest{
 				TgID:     message.From.ID,
 				Username: message.From.UserName,
-				Type:     dto.DefaultUser,
+				TypeID:   dto.DefaultUser,
 			},
 		)
 		if err != nil {

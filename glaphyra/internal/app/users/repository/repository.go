@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"glaphyra/internal/app/users/dto"
@@ -11,7 +12,6 @@ import (
 	errs "glaphyra/internal/pkg/errors"
 	"glaphyra/internal/pkg/log"
 	"glaphyra/internal/pkg/tables"
-	"glaphyra/internal/pkg/zodiac_signs"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
@@ -99,17 +99,26 @@ func (r *repository) FindByID(ctx context.Context, TgID int64) (*dto.User, error
 		return nil, log.Wrap(err)
 	}
 
-	return modelToDTO(&user), nil
+	return r.modelToDTO(&user), nil
 }
 
 func (r *repository) UpdateByTgID(ctx context.Context, req *dto.UpdateUserRequest) error {
 	valuesMap := map[string]interface{}{}
 
 	valuesMap = utils.SetIfNotZero(valuesMap, "username", req.Username)
-	valuesMap = utils.SetIfNotZero(valuesMap, "style", req.Style)
+
+	if req.Style != "" {
+		styleID, err := r.getStyleIDByName(req.Style)
+		if err != nil {
+			return log.Wrap(err)
+		}
+		valuesMap["style_id"] = styleID
+	}
+
+	valuesMap = utils.SetIfNotZero(valuesMap, "zodiac_sign_id", req.ZodiacSignID)
+
 	valuesMap = utils.SetIfNotZero(valuesMap, "gender", req.Gender)
 	valuesMap = utils.SetIfNotZero(valuesMap, "birth_date", req.BirthDate)
-	valuesMap = utils.SetIfNotZero(valuesMap, "zodiac_sign", req.ZodiacSign)
 	valuesMap = utils.SetIfNotZero(valuesMap, "birth_time", req.BirthTime)
 	valuesMap = utils.SetIfNotZero(valuesMap, "birth_place", req.BirthPlace)
 	valuesMap = utils.SetIfNotZero(valuesMap, "tokens", req.Tokens)
@@ -123,7 +132,11 @@ func (r *repository) UpdateByTgID(ctx context.Context, req *dto.UpdateUserReques
 		return nil
 	}
 
-	query, args, err := sq.Update(tables.Users).Where(sq.Eq{"tg_id": req.TgID}).SetMap(valuesMap).PlaceholderFormat(sq.Dollar).ToSql()
+	query, args, err := sq.Update(tables.Users).
+		Where(sq.Eq{"tg_id": req.TgID}).
+		SetMap(valuesMap).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
 	if err != nil {
 		return log.Wrap(err)
 	}
@@ -155,7 +168,7 @@ func (r *repository) Create(ctx context.Context, req *dto.CreateUserRequest) err
 	valuesMap := map[string]interface{}{
 		"tg_id":             req.TgID,
 		"username":          username,
-		"type":              req.Type,
+		"type_id":           req.TypeID,
 		"registration_date": time.Now(),
 		"friend_code":       friendCode,
 		"tokens":            100,
@@ -169,7 +182,6 @@ func (r *repository) Create(ctx context.Context, req *dto.CreateUserRequest) err
 	}
 
 	_, err = r.db.Exec(ctx, query, args...)
-
 	if err != nil {
 		return log.Wrap(err)
 	}
@@ -237,17 +249,18 @@ func (r *repository) DeleteByID(ctx context.Context, TgID int64) error {
 
 	return nil
 }
+func (r *repository) modelToDTO(user *model.User) *dto.User {
+	userType, _ := r.getTypeNameByID(user.TypeID.V)
+	userStyle, _ := r.getStyleNameByID(user.StyleID.V)
+	userLanguage, _ := r.getLanguageNameByID(int(user.LanguageID.V))
 
-func modelToDTO(user *model.User) *dto.User {
 	userDTO := dto.User{
 		TgID:             user.TgID,
 		Username:         user.Username,
-		Type:             dto.UserType(user.Type),
+		Type:             userType,
+		Style:            userStyle,
+		ZodiacSign:       userLanguage,
 		RegistrationDate: user.RegistrationDate,
-	}
-
-	if user.Style.Valid {
-		userDTO.Style = user.Style.V
 	}
 
 	if user.Gender.Valid {
@@ -256,10 +269,6 @@ func modelToDTO(user *model.User) *dto.User {
 
 	if user.BirthDate.Valid {
 		userDTO.BirthDate = user.BirthDate.V
-	}
-
-	if user.ZodiacSign.Valid {
-		userDTO.ZodiacSign = zodiac_signs.ZodiacSign(user.ZodiacSign.V)
 	}
 
 	if user.BirthTime.Valid {
@@ -290,7 +299,7 @@ func modelToDTO(user *model.User) *dto.User {
 		userDTO.NotificationTime = user.NotificationTime.V
 	}
 
-	if user.NotificationTime.Valid {
+	if user.LastActionTime.Valid {
 		userDTO.LastActionTime = user.LastActionTime.V
 	}
 
@@ -301,19 +310,21 @@ func buildFindByIDQuery(tgID int64) sq.SelectBuilder {
 	queryBuilder := sq.Select(
 		"tg_id",
 		"username",
-		"type",
-		"style",
+		"type_id",
+		"style_id",
+		"zodiac_sign_id",
 		"gender",
 		"registration_date",
 		"birth_date",
-		"birth_place",
-		"zodiac_sign",
 		"birth_time",
+		"birth_place",
 		"friend_code",
 		"tokens",
 		"family_status",
 		"type_of_activity",
 		"notification_time",
+		"last_action_time",
+		"language_id",
 	).
 		From(tables.Users).
 		Where(sq.Eq{"tg_id": tgID}).
@@ -384,4 +395,123 @@ func (r *repository) GetAllUsersIDs(ctx context.Context) ([]int64, error) {
 	}
 
 	return users, nil
+}
+
+func (r *repository) getStyleIDByName(styleName string) (int, error) {
+	if styleName == "" {
+		return 0, errors.New("style name is empty")
+	}
+
+	var styleID int
+
+	query, args, err := sq.Select("id").
+		From(tables.Styles).
+		Where(sq.Eq{"style": styleName}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return 0, log.Wrap(err)
+	}
+
+	err = r.db.Get(context.Background(), &styleID, query, args...)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, fmt.Errorf("style not found: %s", styleName)
+		}
+		return 0, log.Wrap(err)
+	}
+
+	return styleID, nil
+}
+
+func (r *repository) getStyleNameByID(styleID int) (string, error) {
+	var styleName string
+
+	query, args, err := sq.Select("style").
+		From(tables.Styles).
+		Where(sq.Eq{"id": styleID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return "", log.Wrap(err)
+	}
+
+	err = r.db.Get(context.Background(), &styleName, query, args...)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", fmt.Errorf("style not found: %d", styleID)
+		}
+		return "", log.Wrap(err)
+	}
+
+	return styleName, nil
+}
+
+func (r *repository) getLanguageNameByID(languageID int) (string, error) {
+	var languageName string
+
+	query, args, err := sq.Select("language").
+		From(tables.Languages).
+		Where(sq.Eq{"id": languageID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return "", log.Wrap(err)
+	}
+
+	err = r.db.Get(context.Background(), &languageName, query, args...)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", fmt.Errorf("language not found: %d", languageID)
+		}
+		return "", log.Wrap(err)
+	}
+
+	return languageName, nil
+}
+
+func (r *repository) getTypeNameByID(typeID int) (string, error) {
+	var typeName string
+
+	query, args, err := sq.Select("type").
+		From(tables.Users).
+		Where(sq.Eq{"id": typeID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return "", log.Wrap(err)
+	}
+
+	err = r.db.Get(context.Background(), &typeName, query, args...)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", fmt.Errorf("type not found: %d", typeID)
+		}
+		return "", log.Wrap(err)
+	}
+
+	return typeName, nil
+}
+
+func (r *repository) getZodiacSignNameByID(zodiacSignID int) (string, error) {
+	var zodiacSignName string
+
+	query, args, err := sq.Select("zodiac_sign").
+		From(tables.ZodiacSigns).
+		Where(sq.Eq{"id": zodiacSignID}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return "", log.Wrap(err)
+	}
+
+	err = r.db.Get(context.Background(), &zodiacSignName, query, args...)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", fmt.Errorf("zodiac sign not found: %d", zodiacSignID)
+		}
+		return "", log.Wrap(err)
+	}
+
+	return zodiacSignName, nil
 }

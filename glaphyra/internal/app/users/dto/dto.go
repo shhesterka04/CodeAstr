@@ -2,27 +2,23 @@ package dto
 
 import (
 	"time"
-
-	"glaphyra/internal/pkg/zodiac_signs"
 )
 
 const DefaultUsername = "Звездочет"
 
-type UserType string
-
 const (
-	DefaultUser = UserType("user")
+	DefaultUser = 1
 )
 
 type User struct {
 	TgID             int64
 	Username         string
-	Type             UserType
+	Type             string
 	Style            string
+	ZodiacSign       string
 	Gender           string
 	RegistrationDate time.Time
 	BirthDate        time.Time
-	ZodiacSign       zodiac_signs.ZodiacSign
 	BirthTime        string
 	FamilyStatus     string
 	TypeOfActivity   string
@@ -38,7 +34,7 @@ type CreateUserRequest struct {
 	TgID     int64
 	Username string
 	Language string
-	Type     UserType
+	TypeID   int `json:"type_id"`
 }
 
 type UpdateUserRequest struct {
@@ -47,7 +43,7 @@ type UpdateUserRequest struct {
 	Style            string
 	Gender           string
 	BirthDate        time.Time
-	ZodiacSign       zodiac_signs.ZodiacSign
+	ZodiacSignID     int64 `json:"zodiac_sign_id"`
 	BirthTime        string
 	BirthPlace       string
 	Tokens           int32
