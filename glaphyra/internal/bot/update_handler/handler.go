@@ -14,6 +14,7 @@ import (
 	"glaphyra/internal/bot/user_cmd_handler"
 	"glaphyra/internal/llm/handlers"
 
+	"github.com/go-redis/redis/v8"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -24,12 +25,12 @@ type implUpdateHandler struct {
 	cmdHandler user_cmd_handler.UserCommandHandler
 }
 
-func NewUpdateHandler(cmdHandler user_cmd_handler.UserCommandHandler, userSrv userservice.UserService, gptApi handlers.Handler) bot.UpdateHandler {
+func NewUpdateHandler(cmdHandler user_cmd_handler.UserCommandHandler, userSrv userservice.UserService, gptApi handlers.Handler, redis *redis.Client) bot.UpdateHandler {
 	i := &implUpdateHandler{
 		cmdHandler: cmdHandler,
 		registry:   NewCommandRegistry(),
 	}
-	i.registerCommands(userSrv, gptApi)
+	i.registerCommands(userSrv, gptApi, redis)
 
 	return i
 }
@@ -60,7 +61,7 @@ func (i *implUpdateHandler) HandleUpdate(update tgbotapi.Update) {
 	return
 }
 
-func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService, gptApi handlers.Handler) {
+func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService, gptApi handlers.Handler, redis *redis.Client) {
 	i.registry.Register("/start", cmd.NewStartCommand(userSrv))
 	i.registry.Register(backCommand, &user_cmd_handler.BackCommand{})
 
@@ -72,9 +73,9 @@ func (i *implUpdateHandler) registerCommands(userSrv userservice.UserService, gp
 	i.registry.Register("О боте", &cmd.AboutCommand{})
 
 	// Предсказания
-	i.registry.Register("Гороскоп на день", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Daily))
-	i.registry.Register("Гороскоп на неделю", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Weekly))
-	i.registry.Register("Гороскоп на месяц", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Monthly))
+	i.registry.Register("Гороскоп на день", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Daily, redis))
+	i.registry.Register("Гороскоп на неделю", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Weekly, redis))
+	i.registry.Register("Гороскоп на месяц", predictions.NewHoroscopeCommand(userSrv, gptApi, predictions.Monthly, redis))
 	i.registry.Register("Натальная карта", predictions.NewNatalCommand(userSrv, gptApi))
 
 	// Совместимость

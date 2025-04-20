@@ -16,6 +16,7 @@ import (
 	yadto "glaphyra/internal/llm/yagpt/dto"
 	"glaphyra/internal/pkg/log"
 
+	"github.com/go-redis/redis/v8"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
@@ -47,19 +48,20 @@ var msgVars = []string{
 }
 
 type Bot struct {
-	api     *tgbotapi.BotAPI
-	handler bot.UpdateHandler
-	gptApi  handlers.Handler
-	userSrv userservice.UserService
+	api         *tgbotapi.BotAPI
+	handler     bot.UpdateHandler
+	gptApi      handlers.Handler
+	userSrv     userservice.UserService
+	redisClient *redis.Client
 }
 
-func NewBot(tgToken string, userSrv userservice.UserService, gptApi handlers.Handler) (*Bot, error) {
+func NewBot(tgToken string, userSrv userservice.UserService, gptApi handlers.Handler, redis *redis.Client) (*Bot, error) {
 	api, err := tgbotapi.NewBotAPI(tgToken)
 	if err != nil {
 		return nil, err
 	}
 	userCmdHandler := user_cmd_handler.NewUserCmdHandler(api, userSrv)
-	updateHandler := update_handler.NewUpdateHandler(userCmdHandler, userSrv, gptApi)
+	updateHandler := update_handler.NewUpdateHandler(userCmdHandler, userSrv, gptApi, redis)
 
 	return &Bot{api: api, handler: updateHandler, gptApi: gptApi, userSrv: userSrv}, nil
 }

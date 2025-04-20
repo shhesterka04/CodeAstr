@@ -10,6 +10,7 @@ import (
 	"glaphyra/internal/llm/handlers"
 	"glaphyra/internal/pkg/db"
 	"glaphyra/internal/pkg/log"
+	redisclient "glaphyra/internal/pkg/redis"
 )
 
 const cfgPath = "config.yaml"
@@ -35,7 +36,9 @@ func main() {
 	userService := service.NewUserService(repo)
 	yaGptApi := handlers.NewYaGPTHandler(cfg)
 
-	b, err := bot.NewBot(cfg.TgToken, userService, yaGptApi)
+	redisClient := redisclient.NewRedisClient()
+
+	b, err := bot.NewBot(cfg.TgToken, userService, yaGptApi, redisClient)
 	if err != nil {
 		log.Error(err)
 		return
