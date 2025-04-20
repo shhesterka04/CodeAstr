@@ -17,3 +17,37 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+    networks:
+      - net
+
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - net
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    restart: always
+    ports:
+      - "8123:8123"
+      - "9000:9000"
+      - "9009:9009"
+    environment:
+      CLICKHOUSE_DB: test
+      CLICKHOUSE_USER: test
+      CLICKHOUSE_PASSWORD: test
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8123/ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    networks:
+      - net

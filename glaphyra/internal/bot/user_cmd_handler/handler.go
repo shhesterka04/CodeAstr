@@ -2,7 +2,6 @@ package user_cmd_handler
 
 import (
 	"context"
-	"fmt"
 	"sync"
 	"time"
 
@@ -109,7 +108,7 @@ func (i *implUserCmdHandler) HandleUserCallback(msgID int64, userID int64, callb
 		}
 
 	default:
-		fmt.Println("it was unknown command")
+		log.WriteLog("it was unknown command")
 	}
 
 	return nil

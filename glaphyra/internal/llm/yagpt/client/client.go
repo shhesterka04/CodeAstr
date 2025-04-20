@@ -5,15 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 
-	"github.com/pkg/errors"
 	"glaphyra/config"
 	"glaphyra/internal/llm/yagpt/dto"
+	"glaphyra/internal/pkg/log"
+
+	"github.com/pkg/errors"
 )
 
-// пока хардкод мб в конфиг надо
 const url = "https://llm.api.cloud.yandex.net/foundationModels/v1/completion"
 
 type YaGPTClient struct {
@@ -25,24 +25,24 @@ func NewYaGPTClient(config *config.Config) *YaGPTClient {
 }
 
 func (c *YaGPTClient) CallAPI(reqDTO dto.RequestDTO) (dto.ResponseDTO, error) {
-	log.Printf("Calling YaGPT API with request: %v", reqDTO)
+	log.WriteLogf("Calling YaGPT API with request: %v", reqDTO)
 
 	requestBodyBytes, err := c.buildRequestBody(reqDTO)
 	if err != nil {
-		log.Printf("build request body: %s", err)
+		log.WriteLogf("build request body: %s", err)
 		return dto.ResponseDTO{}, err
 	}
 
 	req, err := c.buildHTTPRequest(requestBodyBytes)
 	if err != nil {
-		log.Printf("create request: %s", err)
+		log.WriteLogf("create request: %s", err)
 		return dto.ResponseDTO{}, err
 	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Printf("send request: %s", err)
+		log.WriteLogf("send request: %s", err)
 		return dto.ResponseDTO{}, err
 	}
 	defer func(Body io.ReadCloser) {
@@ -51,7 +51,7 @@ func (c *YaGPTClient) CallAPI(reqDTO dto.RequestDTO) (dto.ResponseDTO, error) {
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		log.Printf("response code: %v Response body: %s", resp.StatusCode, string(body))
+		log.WriteLogf("response code: %v Response body: %s", resp.StatusCode, string(body))
 		return dto.ResponseDTO{}, errors.New("received non-200 response from YaGPT API")
 	}
 
@@ -92,7 +92,7 @@ func (c *YaGPTClient) buildHTTPRequest(body []byte) (*http.Request, error) {
 func (c *YaGPTClient) processResponse(resp *http.Response) (dto.ResponseDTO, error) {
 	var apiResponse map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
-		log.Printf("decode response: %s", err)
+		log.WriteLogf("decode response: %s", err)
 		return dto.ResponseDTO{}, err
 	}
 
@@ -109,6 +109,6 @@ func (c *YaGPTClient) processResponse(resp *http.Response) (dto.ResponseDTO, err
 		ModelVersion:     result["modelVersion"].(string),
 	}
 
-	log.Printf("Received response from YaGPT: %v", responseDTO)
+	log.WriteLogf("Received response from YaGPT: %v", responseDTO)
 	return responseDTO, nil
 }

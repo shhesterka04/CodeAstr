@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"glaphyra/internal/app/users/dto"
@@ -112,7 +113,7 @@ func (b *Bot) handleHourlyTask(hour int) {
 			TgID:   id,
 			Tokens: 100,
 		})
-		fmt.Println("User with id", id, "received 100 tokens, hour: ", hour)
+		log.WriteLog("User with id" + strconv.Itoa(int(id)) + "received 100 tokens, hour: " + strconv.Itoa(hour))
 		b.api.Send(tgbotapi.NewMessage(id, msgVars[rand.Intn(len(msgVars))]))
 	}
 }

@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 
 	"glaphyra/config"
 	"glaphyra/internal/app/users/repository"
@@ -10,6 +9,7 @@ import (
 	"glaphyra/internal/bot/bot"
 	"glaphyra/internal/llm/handlers"
 	"glaphyra/internal/pkg/db"
+	"glaphyra/internal/pkg/log"
 )
 
 const cfgPath = "config.yaml"
@@ -17,7 +17,8 @@ const cfgPath = "config.yaml"
 func main() {
 	cfg, err := config.LoadConfig(cfgPath)
 	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
+		log.Error(err)
+		return
 	}
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -25,7 +26,8 @@ func main() {
 
 	database, err := db.NewDB(ctx, cfg.DbDSN)
 	if err != nil {
-		log.Fatal(err)
+		log.Error(err)
+		return
 	}
 	defer database.Close()
 
@@ -35,8 +37,11 @@ func main() {
 
 	b, err := bot.NewBot(cfg.TgToken, userService, yaGptApi)
 	if err != nil {
-		log.Fatalf("Error creating bot: %v", err)
+		log.Error(err)
+		return
 	}
-	log.Println("Bot started")
+
+	log.WriteLog("Bot started")
+
 	b.Start()
 }
