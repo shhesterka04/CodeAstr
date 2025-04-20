@@ -106,3 +106,21 @@ func WrapErr(err error) error {
 func Wrap(err error) error {
 	return fmt.Errorf("%w", err)
 }
+
+func LogCommand(tgID int64, command string) {
+	ctx := context.Background()
+
+	query := `
+        INSERT INTO history (tg_id, command, created_at)
+        VALUES (?, ?, ?)
+    `
+
+	// Выполняем запрос
+	if err := clickhouseConn.Exec(ctx, query,
+		tgID,
+		command,
+		time.Now(),
+	); err != nil {
+		fmt.Println("Failed to insert command log into ClickHouse:", err)
+	}
+}

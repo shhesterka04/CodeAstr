@@ -1,8 +1,6 @@
 package update_handler
 
 import (
-	"log"
-
 	userservice "glaphyra/internal/app/users/service"
 	"glaphyra/internal/bot"
 	cmd "glaphyra/internal/bot/commands"
@@ -13,6 +11,7 @@ import (
 	"glaphyra/internal/bot/commands/settings"
 	"glaphyra/internal/bot/user_cmd_handler"
 	"glaphyra/internal/llm/handlers"
+	"glaphyra/internal/pkg/log"
 
 	"github.com/go-redis/redis/v8"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -44,19 +43,24 @@ func (i *implUpdateHandler) HandleUpdate(update tgbotapi.Update) {
 		userID = update.Message.From.ID
 		message = update.Message
 		command = i.registry.Get(update.Message.Text)
+
+		log.LogCommand(userID, update.Message.Text)
+
 	case update.CallbackQuery != nil:
 		userID = update.CallbackQuery.From.ID
 		messageID := update.CallbackQuery.Message.MessageID
 		err := i.cmdHandler.HandleUserCallback(int64(messageID), userID, update.CallbackQuery)
 		if err != nil {
-			log.Println(err)
+			log.Error(err)
 		}
+
+		log.LogCommand(userID, update.CallbackQuery.Data)
 		return
 	}
 
 	err := i.cmdHandler.HandleUserCommand(userID, command, message)
 	if err != nil {
-		log.Println(err)
+		log.Error(err)
 	}
 	return
 }
