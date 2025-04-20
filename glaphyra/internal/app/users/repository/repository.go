@@ -19,6 +19,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+const DefaultLanguage = "Русский"
+
 type Repository interface {
 	FindByID(ctx context.Context, TgID int64) (*dto.User, error)
 	Create(ctx context.Context, req *dto.CreateUserRequest) error
@@ -39,6 +41,46 @@ func NewRepository(db db.DBops) Repository {
 	return &repository{
 		db: db,
 	}
+}
+
+func (r *repository) getLanguageIDByName(languageName string) (int, error) {
+	if languageName == "" {
+		languageName = DefaultLanguage
+	}
+
+	var languageID int
+
+	query, args, err := sq.Select("id").
+		From(tables.Languages).
+		Where(sq.Eq{"language": languageName}).
+		PlaceholderFormat(sq.Dollar).
+		ToSql()
+	if err != nil {
+		return 0, log.Wrap(err)
+	}
+
+	err = r.db.Get(context.Background(), &languageID, query, args...)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			defaultQuery, defaultArgs, defaultErr := sq.Select("id").
+				From(tables.Languages).
+				Where(sq.Eq{"language": DefaultLanguage}).
+				PlaceholderFormat(sq.Dollar).
+				ToSql()
+			if defaultErr != nil {
+				return 0, log.Wrap(defaultErr)
+			}
+
+			defaultErr = r.db.Get(context.Background(), &languageID, defaultQuery, defaultArgs...)
+			if defaultErr != nil {
+				return 0, log.Wrap(defaultErr)
+			}
+		} else {
+			return 0, log.Wrap(err)
+		}
+	}
+
+	return languageID, nil
 }
 
 func (r *repository) FindByID(ctx context.Context, TgID int64) (*dto.User, error) {
@@ -75,6 +117,7 @@ func (r *repository) UpdateByTgID(ctx context.Context, req *dto.UpdateUserReques
 	valuesMap = utils.SetIfNotZero(valuesMap, "notification_time", req.NotificationTime)
 	valuesMap = utils.SetIfNotZero(valuesMap, "family_status", req.FamilyStatus)
 	valuesMap = utils.SetIfNotZero(valuesMap, "last_action_time", req.LastActionTime)
+	valuesMap = utils.SetIfNotZero(valuesMap, "language_id", req.Language)
 
 	if len(valuesMap) == 0 {
 		return nil
@@ -104,6 +147,11 @@ func (r *repository) Create(ctx context.Context, req *dto.CreateUserRequest) err
 		username = req.Username
 	}
 
+	languageID, err := r.getLanguageIDByName(req.Language)
+	if err != nil {
+		return log.Wrap(err)
+	}
+
 	valuesMap := map[string]interface{}{
 		"tg_id":             req.TgID,
 		"username":          username,
@@ -112,6 +160,7 @@ func (r *repository) Create(ctx context.Context, req *dto.CreateUserRequest) err
 		"friend_code":       friendCode,
 		"tokens":            100,
 		"notification_time": 18,
+		"language_id":       languageID,
 	}
 
 	query, args, err := sq.Insert(tables.Users).PlaceholderFormat(sq.Dollar).SetMap(valuesMap).ToSql()

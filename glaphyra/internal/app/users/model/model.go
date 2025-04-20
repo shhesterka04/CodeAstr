@@ -22,4 +22,5 @@ type User struct {
 	TypeOfActivity   sql.Null[string]    `db:"type_of_activity"`
 	NotificationTime sql.Null[int32]     `db:"notification_time"`
 	LastActionTime   sql.Null[time.Time] `db:"last_action_time"`
+	Language         sql.Null[int64]     `db:"language_id"`
 }

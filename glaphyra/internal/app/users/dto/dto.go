@@ -6,19 +6,12 @@ import (
 	"glaphyra/internal/pkg/zodiac_signs"
 )
 
-const DefaultUsername = "Звездочет ебучий"
+const DefaultUsername = "Звездочет"
 
 type UserType string
 
 const (
 	DefaultUser = UserType("user")
-	Admin       = UserType("admin")
-)
-
-const (
-	FriendlyStyle = "Дружелюбный стиль"
-	SeriousStyle  = "Серьезный стиль"
-	FunnyStyle    = "Шутливый стиль"
 )
 
 type User struct {
@@ -38,11 +31,13 @@ type User struct {
 	Tokens           int32
 	NotificationTime int32
 	LastActionTime   time.Time
+	Language         string
 }
 
 type CreateUserRequest struct {
 	TgID     int64
 	Username string
+	Language string
 	Type     UserType
 }
 
@@ -60,6 +55,7 @@ type UpdateUserRequest struct {
 	TypeOfActivity   string
 	NotificationTime int32
 	LastActionTime   time.Time
+	Language         string
 }
 
 type ReflectionRecord struct {
